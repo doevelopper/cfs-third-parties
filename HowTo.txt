@@ -1,0 +1,4 @@
+
+To update qll submodules and sub subodules at once 
+git submodule add --depth=1 -b master https://github.com/objectcomputing/OpenDDS.git
+git submodule update --init --recursive

@@ -1,0 +1,75 @@
+[submodule "MPC"]
+	path = MPC
+	url = https://github.com/DOCGroup/MPC.git
+[submodule "CIAO"]
+	path = CIAO
+	url = https://github.com/DOCGroup/CIAO.git
+	branch = master
+[submodule "DAnCE"]
+	path = DAnCE
+	url = https://github.com/DOCGroup/DAnCE.git
+	branch = master
+[submodule "ACE_TAO"]
+	path = ACE_TAO
+	url = https://github.com/DOCGroup/ACE_TAO.git
+	branch = master
+[submodule "libexpat"]
+	path = libexpat
+	url = https://github.com/libexpat/libexpat.git
+	branch = master
+[submodule "googletest"]
+	path = googletest
+	url = https://github.com/google/googletest.git
+	branch = master
+[submodule "benchmark"]
+	path = benchmark
+	url = https://github.com/google/benchmark.git
+	branch = master
+[submodule "wireshark"]
+	path = wireshark
+	url = https://code.wireshark.org/review/p/wireshark.git
+	branch = master
+[submodule "logging-log4cxx"]
+	path = logging-log4cxx
+	url = https://git-wip-us.apache.org/repos/asf/logging-log4cxx.git
+	branch = master
+[submodule "OpenDDS"]
+	path = OpenDDS
+	url = https://github.com/objectcomputing/OpenDDS.git
+	branch = master
+[submodule "uncrustify"]
+	path = uncrustify
+	url = https://github.com/uncrustify/uncrustify.git
+	branch = master
+[submodule "doxygen"]
+	path = doxygen
+	url = https://github.com/doxygen/doxygen.git
+	branch = master
+[submodule "cppcheck"]
+	path = cppcheck
+	url = https://github.com/danmar/cppcheck.git
+	branch = master
+[submodule "cucumber-cpp"]
+	path = cucumber-cpp
+	url = https://github.com/cucumber/cucumber-cpp.git
+	branch = master
+[submodule "Fast-RTPS"]
+	path = Fast-RTPS
+	url = https://github.com/eProsima/Fast-RTPS.git
+	branch = master
+[submodule "opensplice"]
+	path = opensplice
+	url = https://github.com/ADLINK-IST/opensplice.git
+	branch = master
+[submodule "crc32c"]
+	path = crc32c
+	url = https://github.com/google/crc32c.git
+	branch = master
+[submodule "statechart"]
+	path = statechart
+	url = https://github.com/google/statechart.git
+	branch = master
+[submodule "capture-thread"]
+	path = capture-thread
+	url = https://github.com/google/capture-thread.git
+	branch = current

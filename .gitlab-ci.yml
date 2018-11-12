@@ -1,0 +1,21 @@
+
+stages:
+    - dependencies
+    - configure
+    - compile
+    - test-compile
+    - unit-test
+    - target-package
+    - feature-test
+    - verify
+    - code-review
+    - target-install
+    - site
+    - deploy
+    - target-clean
+
+
+build:
+    stage:compile
+
+
