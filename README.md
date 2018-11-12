@@ -87,4 +87,3 @@ You should be aware that this project is supported solely by me and provided as 
 Go back to the **[project description][d]**
 
 Copyright © 2014 - 2018 A.H.L
->>>>>>> 3c95ce54813b0028a83298b13616540f3b883354
