@@ -1,21 +1,93 @@
 
+
 stages:
     - dependencies
-    - configure
     - compile
-    - test-compile
-    - unit-test
+    - test
     - target-package
-    - feature-test
-    - verify
-    - code-review
     - target-install
-    - site
     - deploy
     - target-clean
 
+cache:
+    paths:
+        - $CI_PROJECT_NAMESPACE/devslibs
 
-build:
-    stage:compile
+uncrustify:
+
+    stage: dependencies
+
+    before_script:
+        - echo "Only when AArch64 is true"
+        - date -u
+
+    script:
+        - git clone --depth=1 https://github.com/uncrustify/uncrustify.git
+        - cmake -E make_directory uncrustify/build
+        - cmake -E chdir uncrustify/build -DCMAKE_INSTALL_PREFIX=$CI_PROJECT_NAMESPACE/devslibs
+        - cmake --build uncrustify/build --target all --clean-first -- -j$(nproc)
+        - cmake --build build --target install
+
+    after_script:
+        - date -u
+
+    tags:
+        - agent-smith
+
+    only:
+        variables:
+            - ${BOOTSTRAP}
+
+    artifacts:
+        paths:
+            - $CI_PROJECT_NAMESPACE/devslibs
+
+apache:
+
+    stage: dependencies
+
+    before_script:
+        - echo "Only when AArch64 is true"
+        - date -u
+
+    script:
+        - wget --quiet https://www-us.apache.org/dist/apr/apr-1.6.5.tar.gz
+        - tar -xvzf apr-1.6.5.tar.gz > /dev/null
+        - cd apr-1.6.5
+        - |
+            ./configure --prefix=$CI_PROJECT_NAMESPACE/devslibs --enable-threads --enable-posix-shm \
+            --enable-allocator-guard-pages --enable-pool-concurrency-check --enable-other-child
+        - make clean && make && make install
+        - cd ..
+        - git clone --depth=1 https://github.com/libexpat/libexpat.git
+        - cmake -E make_directory libexpat/expat/build
+        - cmake -E chdir libexpat/expat/build cmake .. -DCMAKE_INSTALL_PREFIX=$CI_PROJECT_NAMESPACE/devslibs -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        - cmake --build libexpat/expat/build --target all --clean-first
+        - cmake --build libexpat/expat/build --target install
+        - cd ..
+        - wget --quiet https://www-us.apache.org/dist//apr/apr-util-1.6.1.tar.gz
+        - tar -xvf apr-util-1.6.1.tar.gz > /dev/null
+        - cd apr-util-1.6.1
+        - ./configure --prefix=$CI_PROJECT_NAMESPACE/devslibs --with-apr=../apr-1.6.5 --with-crypto
+        - make clean && make && make install
+        - cd ..
+        - git clone --depth=1 https://git-wip-us.apache.org/repos/asf/logging-log4cxx.git
+        - cd logging-log4cxx
+        - ./autogen.sh
+        - |
+            ./configure --prefix=$CI_PROJECT_NAMESPACE/devslibs --with-apr=$CI_PROJECT_NAMESPACE/devslibs \
+                --with-apr-util=$CI_PROJECT_NAMESPACE/devslibs --with-ODBC=no --with-SMTP=no \
+                --enable-char --enable-wchar_t \
+                --with-charset=utf-8 --with-logchar=utf-8
+        - make clean && make && make install
+        - cd ..
+
+    after_script:
+        - date -u
+
+    artifacts:
+        paths:
+            - $CI_PROJECT_NAMESPACE/devslibs
+
 
 
