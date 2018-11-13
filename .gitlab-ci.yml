@@ -1,5 +1,3 @@
-
-
 stages:
     - dependencies
     - compile
@@ -9,12 +7,15 @@ stages:
     - deploy
     - target-clean
 
+# Cache in between builds
 cache:
+    key: ${CI_COMMIT_REF_SLUG}
     paths:
         - $CI_PROJECT_NAMESPACE/devslibs
+        - compilers
+        - vendor/ruby
 
 uncrustify:
-
     stage: dependencies
 
     before_script:
@@ -34,9 +35,9 @@ uncrustify:
     tags:
         - agent-smith
 
-    only:
-        variables:
-            - ${BOOTSTRAP}
+#    only:
+#        variables:
+#            - ${BOOTSTRAP}
 
     artifacts:
         paths:
@@ -88,6 +89,3 @@ apache:
     artifacts:
         paths:
             - $CI_PROJECT_NAMESPACE/devslibs
-
-
-
