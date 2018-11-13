@@ -43,15 +43,68 @@ uncrustify:
 #            - ${BOOTSTRAP}
 
     artifacts:
+        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+        paths:
+            - ${CI_PROJECT_DIR}/devslibs
+
+cppcheck:
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - cmake --version
+        - git clone --depth=1 https://github.com/danmar/cppcheck.git
+        - cd cppcheck
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs
+        - cmake --build build --target all --clean-first 
+        - cmake --build build --target install
+        - cp --recursive --verbose cfg  $CI_PROJECT_NAMESPACE/devslibs || true
+        - cd ..
+
+    after_script:
+        - date -u
+
+    tags:
+        - agent-smith
+
+    artifacts:
+        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+        paths:
+            - ${CI_PROJECT_DIR}/devslibs
+
+doxygen:
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - cmake --version
+        - cd doxygen
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=$CI_PROJECT_NAMESPACE/dds
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+    after_script:
+        - date -u
+
+    tags:
+        - agent-smith
+
+    artifacts:
+        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
         paths:
             - ${CI_PROJECT_DIR}/devslibs
 
 apache:
-
     stage: dependencies
 
     before_script:
-        - echo "Only when AArch64 is true"
         - date -u
 
     script:
@@ -95,10 +148,109 @@ apache:
     tags:
         - agent-smith
 
-#    only:
     after_script:
         - date -u
 
     artifacts:
+        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+        paths:
+            - ${CI_PROJECT_DIR}/devslibs
+
+google-tools:
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - echo "Building Google Test"
+        - git clone --depth=1 --recurse-submodules https://github.com/google/googletest.git
+        - cd googletest
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building gogole Bench Mark"
+        - git clone --depth=1 --recurse-submodules https://github.com/google/benchmark.git
+        - cd benchmark
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+    tags:
+        - agent-smith
+
+    after_script:
+        - date -u
+
+    artifacts:
+        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+        paths:
+            - ${CI_PROJECT_DIR}/devslibs
+
+OpenDDS:
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - echo "Building Xerces for DDS"
+        - wget --quiet http://www-us.apache.org/dist//xerces/c/3/sources/xerces-c-3.2.2.tar.gz
+        - tar -xvzf xerces-c-3.2.1.tar.gz  > /dev/null
+        - cd xerces-c-3.2.1/
+        - ./configure --prefix=${CI_PROJECT_DIR}/devslibs
+            --enable-static --enable-shared --enable-netaccessor-socket
+            --enable-transcoder-gnuiconv --enable-transcoder-iconv
+            --enable-msgloader-inmemory --enable-xmlch-uint16_t --enable-xmlch-char16_t
+        # - make -j2 | tee $CI_PROJECT_NAMESPACE/build-logs/xerces-build.log
+        # - make install | tee -a $CI_PROJECT_NAMESPACE/build-logs/xerces-build.log
+        - make clean && make && make install
+        - cd ..
+
+        - echo "Building Wireshark for DDs Dissectors"
+        - git clone --depth=1 --recurse-submodules https://code.wireshark.org/review/p/wireshark.git
+        - cd wireshark
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Boost latest"
+        - wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+        - tar -xvf boost_1_68_0.tar.gz > /dev/null
+        - cd boost_1_68_0
+        - ./bootstrap.sh #[--with-libraries=program_options,filesystem,system,date-time,regex,thread]
+        - ./b2 link=shared threading=multi variant=release --prefix=${CI_PROJECT_DIR}/devslibs
+        - cd .
+
+        - echo "Cloning MPC for DDS"
+        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/MPC.git
+        - echo "Cloning ACE TAO for DDS"
+        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/ACE_TAO.git
+        - echo "Cloning CIAO for DDS"
+        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/CIAO.git
+        - echo "Cloning DANCE for DDS"
+        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/DAnCE.git
+        - echo "Cloning OpenDDS"
+        - git clone --depth=1 --recurse-submodules https://github.com/objectcomputing/OpenDDS.git
+        - echo "Building OpenDDS"
+        - ./configure -std=c++11 --ipv6 --openssl --xerces3 --rapidjson --glib --boost
+            --no-tests --ace=$ACE_ROOT --tao=$TAO_ROOT --mpc=$MPC_ROOT
+            --prefix=${CI_PROJECT_DIR}/devslibs/opendds
+        - make clean && make && make install
+        - cd ..
+    tags:
+        - agent-smith
+
+    after_script:
+        - date -u
+
+    artifacts:
+        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
         paths:
             - ${CI_PROJECT_DIR}/devslibs
