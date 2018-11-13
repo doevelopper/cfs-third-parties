@@ -26,7 +26,7 @@ uncrustify:
         - git clone --depth=1 https://github.com/uncrustify/uncrustify.git
         - cd uncrustify
         - cmake -E make_directory build
-        - cmake -E chdir build -DCMAKE_INSTALL_PREFIX=devslibs
+        - cmake -E chdir build -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs ..
         - cmake --build build --target all --clean-first -- -j$(nproc)
         - cmake --build build --target install
         - cd ..
@@ -43,7 +43,7 @@ uncrustify:
 
     artifacts:
         paths:
-            - devslibs
+            - ${CI_PROJECT_DIR}/devslibs
 
 apache:
 
@@ -59,7 +59,7 @@ apache:
         - tar -xvzf apr-1.6.5.tar.gz > /dev/null
         - cd apr-1.6.5
         - |
-            ./configure --prefix=devslibs --enable-threads --enable-posix-shm \
+            ./configure --prefix=${CI_PROJECT_DIR}/devslibs --enable-threads --enable-posix-shm \
             --enable-allocator-guard-pages --enable-pool-concurrency-check --enable-other-child
         - make clean && make && make install
         - cd ..
@@ -68,7 +68,7 @@ apache:
         - git clone --depth=1 https://github.com/libexpat/libexpat.git
         - cd libexpat/expat
         - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=devslibs -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         - cmake --build build --target all --clean-first
         - cmake --build build --target install
         - cd ..
@@ -77,7 +77,7 @@ apache:
         - wget --quiet https://www-us.apache.org/dist//apr/apr-util-1.6.1.tar.gz
         - tar -xvf apr-util-1.6.1.tar.gz > /dev/null
         - cd apr-util-1.6.1
-        - ./configure --prefix=devslibs --with-apr=../apr-1.6.5 --with-crypto
+        - ./configure --prefix=${CI_PROJECT_DIR}/devslibs --with-apr=../apr-1.6.5 --with-crypto
         - make clean && make && make install
         - cd ..
 
@@ -86,7 +86,7 @@ apache:
         - cd logging-log4cxx
         - ./autogen.sh
         - |
-            ./configure --prefix=devslibs --with-apr=devslibs \
+            ./configure --prefix=${CI_PROJECT_DIR}/devslibs --with-apr=devslibs \
                 --with-apr-util=devslibs --with-ODBC=no --with-SMTP=no \
                 --enable-char --enable-wchar_t \
                 --with-charset=utf-8 --with-logchar=utf-8
@@ -98,4 +98,4 @@ apache:
 
     artifacts:
         paths:
-            - devslibs
+            - ${CI_PROJECT_DIR}/devslibs
