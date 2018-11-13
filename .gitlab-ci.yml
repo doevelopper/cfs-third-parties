@@ -59,8 +59,8 @@ apache:
         - tar -xvzf apr-1.6.5.tar.gz > /dev/null
         - cd apr-1.6.5
         - |
-            ./configure --prefix=${CI_PROJECT_DIR}/devslibs --enable-threads --enable-posix-shm \
-            --enable-allocator-guard-pages --enable-pool-concurrency-check --enable-other-child
+            ./configure --prefix=${CI_PROJECT_DIR}/devslibs --enable-threads --enable-posix-shm 
+                --enable-allocator-guard-pages --enable-pool-concurrency-check --enable-other-child
         - make clean && make && make install
         - cd ..
 
@@ -86,13 +86,17 @@ apache:
         - cd logging-log4cxx
         - ./autogen.sh
         - |
-            ./configure --prefix=${CI_PROJECT_DIR}/devslibs --with-apr=devslibs \
-                --with-apr-util=devslibs --with-ODBC=no --with-SMTP=no \
-                --enable-char --enable-wchar_t \
+            ./configure --prefix=${CI_PROJECT_DIR}/devslibs --with-apr=devslibs 
+                --with-apr-util=devslibs --with-ODBC=no --with-SMTP=no 
+                --enable-char --enable-wchar_t 
                 --with-charset=utf-8 --with-logchar=utf-8
         - make clean && make && make install
         - cd ..
 
+    tags:
+        - agent-smith
+
+#    only:
     after_script:
         - date -u
 
