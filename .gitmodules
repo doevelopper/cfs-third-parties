@@ -73,3 +73,7 @@
 	path = externals/capture-thread
 	url = https://github.com/google/capture-thread.git
 	branch = current
+[submodule "XSC"]
+	path = externals/XSC
+	url = https://github.com/DOCGroup/XSC.git
+	branch = master

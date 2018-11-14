@@ -180,6 +180,45 @@ google-tools:
         - cmake --build build --target all --clean-first
         - cmake --build build --target install
         - cd ..
+
+        - echo "Building Google StateChart"
+        - git clone --depth=1 https://github.com/google/statechart.git
+        - cd statechart
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google Abseil CPP Library"
+        - git clone --depth=1 https://github.com/abseil/abseil-cpp.git 
+        - cd abseil-cpp
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google Capture Thread Library"
+        - git clone --depth=1 https://github.com/google/capture-thread.git 
+        - cd capture-thread
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+
+        - echo "Building Google crc32c Library"
+        - git clone --depth=1  https://github.com/google/crc32c.git
+        - cd crc32c
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+
     tags:
         - agent-smith
 
@@ -236,6 +275,16 @@ OpenDDS:
         - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/CIAO.git
         - echo "Cloning DANCE for DDS"
         - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/DAnCE.git
+
+        - echo "Cloning mFAST encoding/decoding library"
+        - git clone --depth=1 --recursive https://github.com/objectcomputing/mFAST.git
+        - cd mFAST
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
         - echo "Cloning OpenDDS"
         - git clone --depth=1 --recurse-submodules https://github.com/objectcomputing/OpenDDS.git
         - echo "Building OpenDDS"
