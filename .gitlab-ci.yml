@@ -186,9 +186,9 @@ google-tools:
         - git clone --depth=1 https://github.com/google/statechart.git
         - cd statechart
         - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
+#        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
+#        - cmake --build build --target all --clean-first
+#        - cmake --build build --target install
         - cd ..
 
         - echo "Building Google Abseil CPP Library"
@@ -208,7 +208,6 @@ google-tools:
         - cmake --build build --target all --clean-first
         - cmake --build build --target install
         - cd ..
-
 
         - echo "Building Google crc32c Library"
         - git clone --depth=1  https://github.com/google/crc32c.git
@@ -274,8 +273,8 @@ OpenDDS:
     script:
         - echo "Building Xerces for DDS"
         - wget --quiet http://www-us.apache.org/dist//xerces/c/3/sources/xerces-c-3.2.2.tar.gz
-        - tar -xvzf xerces-c-3.2.1.tar.gz  > /dev/null
-        - cd xerces-c-3.2.1/
+        - tar -xvzf xerces-c-3.2.2.tar.gz > /dev/null
+        - cd xerces-c-3.2.2/
         - ./configure --prefix=${CI_PROJECT_DIR}/devslibs
             --enable-static --enable-shared --enable-netaccessor-socket
             --enable-transcoder-gnuiconv --enable-transcoder-iconv
@@ -298,16 +297,19 @@ OpenDDS:
         - wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
         - tar -xvf boost_1_68_0.tar.gz > /dev/null
         - cd boost_1_68_0
-        - ./bootstrap.sh #[--with-libraries=program_options,filesystem,system,date-time,regex,thread]
-        - ./b2 link=shared threading=multi variant=release --prefix=${CI_PROJECT_DIR}/devslibs
-        - cd .
+        - ./bootstrap.sh --prefix=${CI_PROJECT_DIR}/devslibs #[--with-libraries=program_options,filesystem,system,date-time,regex,thread]
+        - ./b2 link=shared threading=multi variant=release 
+        - cd ..
 
         - echo "Cloning MPC for DDS"
         - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/MPC.git
+
         - echo "Cloning ACE TAO for DDS"
         - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/ACE_TAO.git
+
         - echo "Cloning CIAO for DDS"
         - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/CIAO.git
+
         - echo "Cloning DANCE for DDS"
         - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/DAnCE.git
 
@@ -320,19 +322,49 @@ OpenDDS:
         - cmake --build build --target install
         - cd ..
 
-        - echo "Cloning OpenDDS"
-        - git clone --depth=1 --recurse-submodules https://github.com/objectcomputing/OpenDDS.git
-        - echo "Building OpenDDS"
-        - ./configure -std=c++11 --ipv6 --openssl --xerces3 --rapidjson --glib --boost
-            --no-tests --ace=$ACE_ROOT --tao=$TAO_ROOT --mpc=$MPC_ROOT
-            --prefix=${CI_PROJECT_DIR}/devslibs/opendds
-        - make clean && make && make install
-        - cd ..
+        # - echo "Cloning OpenDDS"
+        # - git clone --depth=1 --recurse-submodules https://github.com/objectcomputing/OpenDDS.git
+        # - echo "Building OpenDDS"
+        # - ./configure -std=c++11 --ipv6 --openssl --xerces3 --rapidjson --glib --boost
+            # --no-tests --ace=$ACE_ROOT --tao=$TAO_ROOT --mpc=$MPC_ROOT
+            # --prefix=${CI_PROJECT_DIR}/devslibs/opendds
+        # - make clean && make && make install
+        # - cd ..
     tags:
         - agent-smith
 
     after_script:
         - date -u
+
+    artifacts:
+        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+        paths:
+            - ${CI_PROJECT_DIR}/devslibs
+
+vortex-opensplice-dds:
+    stage: dependencies
+
+    before_script:
+        - date -u
+#        - export PROTOBUF_HOME=`pwd`
+
+    script:
+        - git clone --depth=1 --recurse-submodules https://github.com/ADLINK-IST/opensplice.git
+        - cd opensplice
+        - ./configure x86_64.linux-release --prefix=${CI_PROJECT_DIR}/devslibs
+        - source envs-x86_64.linux-dev.sh
+        - make && make install
+        - cd ..
+
+    after_script:
+        - date -u
+        - mkdir -pv ${CI_PROJECT_DIR}/devslibs/adlinktech
+        - cp -v envs-x86_64.linux-dev.sh ${CI_PROJECT_DIR}/devslibs/adlinktech
+        - cp -Rv install/HDE ${CI_PROJECT_DIR}/devslibs/adlinktech
+        - cp -Rv install/RTS ${CI_PROJECT_DIR}/devslibs/adlinktech
+        - cp -Rv install/VS ${CI_PROJECT_DIR}/devslibs/adlinktech
+    tags:
+        - agent-smith
 
     artifacts:
         name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
