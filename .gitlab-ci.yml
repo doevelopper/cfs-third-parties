@@ -219,6 +219,13 @@ google-tools:
         - cmake --build build --target install
         - cd ..
 
+        - echo "Buildinggoogle protocol buffer"
+        - git clone  --recurse-submodules --depth 1 https://github.com/protocolbuffers/protobuf.git
+        - cd protobuf
+        - ./autogen.sh
+        - ./configure --prefix=${CI_PROJECT_DIR}/devslibs
+        - make clean && make && make install
+        - cd ..
 
     tags:
         - agent-smith
