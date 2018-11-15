@@ -125,7 +125,7 @@ apache:
         - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
         - cmake --build build --target all --clean-first
         - cmake --build build --target install
-        - cd ..
+        - cd ../../
 
         - echo "Building Apache Runtime Utils Library"
         - wget --quiet https://www-us.apache.org/dist//apr/apr-util-1.6.1.tar.gz
@@ -265,11 +265,22 @@ eprosima-dds:
             - ${CI_PROJECT_DIR}/devslibs
 
 OpenDDS:
+    variables:
+        ACE_ROOT: ACE_TAO/ACE 
+        TAO_ROOT: ACE_TAO/TAO
+        MPC_ROOT: MPC 
     stage: dependencies
 
     before_script:
         - date -u
-
+        - LD_LIBRARY_PATH=$ACE_ROOT/lib:$LD_LIBRARY_PATH
+        - if [[ "${COMPILER_CC}" != "" ]]; then export CC=${COMPILER_CC}; fi
+        - if [[ "${COMPILER_CXX}" != "" ]]; then export CXX=${COMPILER_CXX}; fi
+        - export CC=gcc-8
+        - export CXX=g++-8
+        - export CCOV=gcov-8
+        - export AR=gcc-ar-8
+        - export RANLIB=gcc-ranlib-8
     script:
         - echo "Building Xerces for DDS"
         - wget --quiet http://www-us.apache.org/dist//xerces/c/3/sources/xerces-c-3.2.2.tar.gz
