@@ -61,7 +61,7 @@ cppcheck:
         - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs
         - cmake --build build --target all --clean-first 
         - cmake --build build --target install
-        - cp --recursive --verbose cfg  $CI_PROJECT_NAMESPACE/devslibs || true
+        - cp --recursive --verbose cfg  ${CI_PROJECT_DIR}/devslibs/bin || true
         - cd ..
 
     after_script:
@@ -83,6 +83,7 @@ doxygen:
 
     script:
         - cmake --version
+        - git clone --depth=1 https://github.com/doxygen/doxygen.git 
         - cd doxygen
         - cmake -E make_directory build
         - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=$CI_PROJECT_NAMESPACE/dds
