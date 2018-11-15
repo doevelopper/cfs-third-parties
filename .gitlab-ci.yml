@@ -197,7 +197,7 @@ google-tools:
         - cmake -E make_directory build
         - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs 
         - cmake --build build --target all --clean-first
-        - cmake --build build --target install
+#        - cmake --build build --target install
         - cd ..
 
         - echo "Building Google Capture Thread Library"
