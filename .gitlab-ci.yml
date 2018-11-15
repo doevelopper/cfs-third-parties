@@ -231,6 +231,33 @@ google-tools:
         paths:
             - ${CI_PROJECT_DIR}/devslibs
 
+eprosima-dds:
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - cmake --version
+        - git clone --depth=1 --recurse-submodules https://github.com/eProsima/Fast-RTPS.git
+        - cd Fast-RTPS
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DTHIRDPARTY=ON -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs/eprosima
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+    after_script:
+        - date -u
+
+    tags:
+        - agent-smith
+
+    artifacts:
+        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+        paths:
+            - ${CI_PROJECT_DIR}/devslibs
+
 OpenDDS:
     stage: dependencies
 
