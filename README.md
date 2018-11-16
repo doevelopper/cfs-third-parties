@@ -13,6 +13,7 @@ d88' `"Y8  888    d88(  "8         <88b.  `888""8P d88' `888     888' `88b `P  )
 --- 01100011 01100110 01110011  00110011 01110010 01100100  01110000 01100001 01110010 01110100 01111001 ----
                                                      --- A.H>l ---
 ```
+[![pipeline status](https://gitlab.com/doevelopper/cfs-third-parties/badges/master/pipeline.svg)](https://gitlab.com/doevelopper/cfs-third-parties/commits/master)
 # Core Flight system Software Architecture
 
 [d]: #project
