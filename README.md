@@ -14,6 +14,11 @@ d88' `"Y8  888    d88(  "8         <88b.  `888""8P d88' `888     888' `88b `P  )
                                                      --- A.H>l ---
 ```
 [![pipeline status](https://gitlab.com/doevelopper/cfs-third-parties/badges/master/pipeline.svg)](https://gitlab.com/doevelopper/cfs-third-parties/commits/master)
+
+[![pipeline status](https://gitlab.com/doevelopper/cfs-third-parties/badges/develop/pipeline.svg)](https://gitlab.com/doevelopper/cfs-third-parties/commits/develop)
+
+[![coverage report](https://gitlab.com/doevelopper/cfs-third-parties/badges/master/coverage.svg)](https://gitlab.com/doevelopper/cfs-third-parties/commits/master)
+[![coverage report](https://gitlab.com/doevelopper/cfs-third-parties/badges/develop/coverage.svg)](https://gitlab.com/doevelopper/cfs-third-parties/commits/develop)
 # Core Flight system Software Architecture
 
 [d]: #project
