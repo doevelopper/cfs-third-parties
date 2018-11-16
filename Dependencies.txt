@@ -1,0 +1,5 @@
+https://www-us.apache.org/dist//apr/apr-1.6.5.tar.gz
+https://www-us.apache.org/dist//apr/apr-util-1.6.1.tar.gz
+https://www-us.apache.org/dist//apr/apr-iconv-1.2.2.tar.gz
+http://www-us.apache.org/dist//xerces/c/3/sources/xerces-c-3.2.2.tar.gz
+

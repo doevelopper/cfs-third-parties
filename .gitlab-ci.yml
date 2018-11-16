@@ -1,0 +1,97 @@
+stages:
+    - dependencies
+    - compile
+    - test
+    - target-package
+    - target-install
+    - deploy
+    - target-clean
+
+.dedicated-runner: &dedicated-runner
+    retry: 1
+    tags:
+        - agent-smith
+
+.default-cache: &default-cache
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+        - ${DEPS_INSTALL_DIR}
+.push-cache: &push-cache
+    cache:
+    <<: *default-cache
+    policy: push
+
+.pull-cache: &pull-cache
+    cache:
+    <<: *default-cache
+    policy: pull
+
+.only_stable: &only_stable
+    only:
+        - master
+        - /^release-.*$/
+
+.tumbleweed: &tumbleweed
+    only:
+        - develop
+        - /^feature-.*$/
+        - /^hotfix-.*$/
+        - /^bugfix-.*$/
+        - /^support-.*$/
+        - /^poc-.*$/
+
+.branch_exceptions: &branch_exceptions
+    only:
+        - branches
+    except:
+        - coverity_scan
+
+.swrs-swtp-swtr: &swrs-swtp-swtr
+    allow_failure: false
+    except:
+        variables:
+            - $CI_COMMIT_REF_NAME =~ /(^docs[\/-].*|.*-docs$)/
+            - $CI_COMMIT_REF_NAME =~ /(^qa[\/-].*|.*-qa$)/
+
+    variables:
+        BUNDLE_GEMFILE: "Gemfile.rails4"
+
+before_script:
+    - date
+    - cmake --version
+    - make --version
+
+after_script:
+    - date
+
+
+variables:
+    DEPS_INSTALL_DIR: /home/gitlab-runner/builds/$CI_PROJECT_NAME
+#    DEPS_INSTALL_DIR: /home/gitlab-runner/$CI_COMMIT_REF_NAME
+
+uncrustify:
+    <<: *dedicated-runner 
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - cmake --version
+        - git clone --depth=1 https://github.com/uncrustify/uncrustify.git
+        - cd uncrustify
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}/devslibs
+        - cmake --build build --target all --clean-first 
+        - cmake --build build --target install
+        - cd ..
+
+    after_script:
+        - date -u
+
+    artifacts:
+        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
+        when: always
+        expire_in: 31d
+        paths:
+            - ${DEPS_INSTALL_DIR}/devslibs
