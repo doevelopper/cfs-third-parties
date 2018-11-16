@@ -16,6 +16,45 @@ stages:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
         - ${DEPS_INSTALL_DIR}
+.push-cache: &push-cache
+    cache:
+    <<: *default-cache
+    policy: push
+
+.pull-cache: &pull-cache
+    cache:
+    <<: *default-cache
+    policy: pull
+
+.only_stable: &only_stable
+    only:
+        - master
+        - /^release-.*$/
+
+.tumbleweed: &tumbleweed
+    only:
+        - develop
+        - /^feature-.*$/
+        - /^hotfix-.*$/
+        - /^bugfix-.*$/
+        - /^support-.*$/
+        - /^poc-.*$/
+
+.branch_exceptions: &branch_exceptions
+    only:
+        - branches
+    except:
+        - coverity_scan
+
+.swrs-swtp-swtr: &swrs-swtp-swtr
+    allow_failure: false
+    except:
+        variables:
+            - $CI_COMMIT_REF_NAME =~ /(^docs[\/-].*|.*-docs$)/
+            - $CI_COMMIT_REF_NAME =~ /(^qa[\/-].*|.*-qa$)/
+
+    variables:
+        BUNDLE_GEMFILE: "Gemfile.rails4"
 
 before_script:
     - date
