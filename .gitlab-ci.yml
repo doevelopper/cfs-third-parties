@@ -296,6 +296,7 @@ OpenDDS:
         - cd ..
 
         - echo "Building Wireshark for DDs Dissectors"
+#        - sudo apt-get install libpulse-dev
         - git clone --depth=1 --recurse-submodules https://code.wireshark.org/review/p/wireshark.git
         - cd wireshark
         - cmake -E make_directory build
