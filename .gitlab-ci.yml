@@ -12,8 +12,22 @@ stages:
     tags:
         - agent-smith
 
+.default-cache: &default-cache
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+        - vendor/ruby
+
+before_script:
+    - date
+    - cmake --version
+    - make --version
+
+after_script:
+    - date
+
+
 variables:
-    DEPS_INSTALL_DIR: /home/gitlab-runner/$CI_PROJECT_NAME
+    DEPS_INSTALL_DIR: /home/gitlab-runner/builds/$CI_PROJECT_NAME
 #    DEPS_INSTALL_DIR: /home/gitlab-runner/$CI_COMMIT_REF_NAME
 
 # Cache in between builds
