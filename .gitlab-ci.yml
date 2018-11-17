@@ -315,7 +315,7 @@ boost-1.68:
 
 eprosima-dds:
     <<: *dedicated-runner
-    stage: primal-dependencies
+    stage: dependencies
 
     before_script:
         - date -u
