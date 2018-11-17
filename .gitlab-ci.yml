@@ -289,6 +289,7 @@ google-tools:
 
 boost-1.68:
     <<: *dedicated-runner
+    stage: dependencies
     before_script:
         - date -u
     script:
