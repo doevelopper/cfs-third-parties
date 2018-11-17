@@ -70,7 +70,7 @@ variables:
     DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
 #    DEPS_INSTALL_DIR: /home/gitlab-runner/$CI_COMMIT_REF_NAME
 
-.uncrustify:
+uncrustify:
     <<: *dedicated-runner 
     stage: primal-dependencies
 
@@ -97,7 +97,7 @@ variables:
         paths:
             - ${DEPS_INSTALL_DIR}
 
-.cppcheck:
+cppcheck:
     <<: *dedicated-runner 
     stage: primal-dependencies
 
@@ -125,7 +125,7 @@ variables:
         paths:
             - ${DEPS_INSTALL_DIR}
 
-.doxygen:
+doxygen:
     <<: *dedicated-runner 
     stage: primal-dependencies
 
@@ -153,7 +153,7 @@ variables:
             - ${DEPS_INSTALL_DIR}
 
 
-.apache:
+apache:
     <<: *dedicated-runner
     stage: primal-dependencies
 
