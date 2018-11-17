@@ -207,7 +207,7 @@ variables:
         paths:
             - ${DEPS_INSTALL_DIR}
 
-google-tools:
+google-dev-utils:
     <<: *dedicated-runner
     stage: dependencies
 
