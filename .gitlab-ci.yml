@@ -9,8 +9,8 @@ stages:
 
 .dedicated-runner: &dedicated-runner
     retry: 1
-    tags:
-        - agent-smith
+    # tags:
+        # - agent-smith
 
 .default-cache: &default-cache
     key: ${CI_COMMIT_REF_SLUG}
