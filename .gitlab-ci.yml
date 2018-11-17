@@ -224,7 +224,7 @@ google-tools:
         - cmake --build build --target install
         - cd ..
 
-        - echo "Building gogole Bench Mark"
+        - echo "Building Google Bench Mark"
         - git clone --depth=1 --recurse-submodules https://github.com/google/benchmark.git
         - cd benchmark
         - cmake -E make_directory build
@@ -242,12 +242,39 @@ google-tools:
         - cmake --build build --target install
         - cd ..
 
-        - echo "Buildinggoogle protocol buffer"
+        - echo "Building Google protocol buffer"
         - git clone  --recurse-submodules --depth 1 https://github.com/protocolbuffers/protobuf.git
         - cd protobuf
         - ./autogen.sh
         - ./configure --prefix=${DEPS_INSTALL_DIR}
         - make clean && make && make install
+        - cd ..
+
+        - echo "Building Google StateChart"
+        - git clone --depth=1 https://github.com/google/statechart.git
+        - cd statechart
+        - cmake -E make_directory build
+#        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+#        - cmake --build build --target all --clean-first
+#        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google Abseil CPP Library"
+        - git clone --depth=1 https://github.com/abseil/abseil-cpp.git
+        - cd abseil-cpp
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+#        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google Capture Thread Library"
+        - git clone --depth=1 https://github.com/google/capture-thread.git
+        - cd capture-thread
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+#        - cmake --build build --target all --clean-first
+#        - cmake --build build --target install
         - cd ..
 
     after_script:
@@ -259,3 +286,55 @@ google-tools:
         expire_in: 31d
         paths:
             - ${DEPS_INSTALL_DIR}
+
+boost-1.68:
+    <<: *dedicated-runner
+    before_script:
+        - date -u
+    script:
+        - cmake --version
+        - echo "Building Boost latest"
+        - wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+        - tar -xvf boost_1_68_0.tar.gz > /dev/null
+        - cd boost_1_68_0
+        - ./bootstrap.sh --prefix=${DEPS_INSTALL_DIR} #[--with-libraries=program_options,filesystem,system,date-time,regex,thread]
+        - ./b2 link=shared threading=multi variant=release
+        - cd ..
+
+    after_script:
+        - date -u
+
+    artifacts:
+        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
+        when: always
+        expire_in: 31d
+        paths:
+            - ${DEPS_INSTALL_DIR}
+
+eprosima-dds:
+    <<: *dedicated-runner
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - cmake --version
+        - git clone --depth=1 --recurse-submodules https://github.com/eProsima/Fast-RTPS.git
+        - cd Fast-RTPS
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DTHIRDPARTY=ON -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/devslibs/eprosima
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+    after_script:
+        - date -u
+
+    artifacts:
+        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
+        when: always
+        expire_in: 31d
+        paths:
+            - ${DEPS_INSTALL_DIR}
+
