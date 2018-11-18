@@ -299,8 +299,11 @@ boost-1.68:
         - wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
         - tar -xvf boost_1_68_0.tar.gz > /dev/null
         - cd boost_1_68_0
-        - ./bootstrap.sh --prefix=${DEPS_INSTALL_DIR} #[--with-libraries=program_options,filesystem,system,date-time,regex,thread]
+#[--with-libraries=program_options,filesystem,system,date-time,regex,thread]
+        - ./bootstrap.sh --prefix=${DEPS_INSTALL_DIR} --with-python=python3
         - ./b2 link=shared threading=multi variant=release
+#        - ./b2 install --prefix=${DEPS_INSTALL_DIR}
+        - ./b2 install
         - cd ..
 
     after_script:
