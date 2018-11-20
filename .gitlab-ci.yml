@@ -208,7 +208,7 @@ apache:
         paths:
             - ${DEPS_INSTALL_DIR}
 
-google-dev-utils:
+cpp-dev-utils:
     <<: *dedicated-runner
     stage: primal-dependencies
 
@@ -275,6 +275,51 @@ google-dev-utils:
         - cmake -E make_directory build
         - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
 #        - cmake --build build --target all --clean-first
+#        - cmake --build build --target install
+        - cd ..
+
+
+        - echo "Building American fuzzy lop"
+#        - curl -L -O -k http://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz
+#        - tar -xvzf afl-latest.tgz
+
+        - echo "Building A unit testing framework for C"
+        - git clone --depth=1 --recurse-submodules https://github.com/libcheck/check.git 
+        - cd check
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+#        - cmake --build build --target all --clean-first
+#        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
+#        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building The Linux perf GUI for performance analysis."
+        - git clone --depth=1 --recurse-submodules https://github.com/KDAB/hotspot.git 
+        - cd hotspot
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+#        - cmake --build build --target all --clean-first
+#        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
+#        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building The Linux perf GUI for performance analysis."
+        - git clone --depth=1 --recurse-submodules https://github.com/apitrace/apitrace.git 
+        - cd apitrace
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+#        - cmake --build build --target all --clean-first
+#        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
+#        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building IEEE doubles binary-decimal and decimal-binary ."
+        - git clone --depth=1 --recurse-submodules https://github.com/google/double-conversion.git 
+        - cd apitrace
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+#        - cmake --build build --target all --clean-first
+#        - test/cctest/cctest --list | tr -d '<' | xargs test/cctest/cctest
 #        - cmake --build build --target install
         - cd ..
 
