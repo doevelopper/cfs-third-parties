@@ -74,7 +74,6 @@ uncrustify:
 
     before_script:
         - date -u
-#        - mkdir -pv ${DEPS_INSTALL_DIR}
 
     script:
         - cmake --version
@@ -104,8 +103,28 @@ cppcheck:
         - cmake -E make_directory build
         - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
         - cmake --build build --target all --clean-first 
-        - sudo cmake --build build --target install
-        - sudo cp --recursive --verbose cfg  ${DEPS_INSTALL_DIR}/bin || true
+        - cmake --build build --target install
+        - cp --recursive --verbose cfg  ${DEPS_INSTALL_DIR}/bin || true
+        - cd ..
+
+    after_script:
+        - date -u
+
+doxygen:
+    <<: *dedicated-runner 
+    stage: primal-dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - cmake --version
+        - git clone --depth=1 https://github.com/doxygen/doxygen.git 
+        - cd doxygen
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
         - cd ..
 
     after_script:
