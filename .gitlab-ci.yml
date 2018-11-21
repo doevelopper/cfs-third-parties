@@ -1,32 +1,21 @@
+# sudo usermod -a -G sudo gitlab-runner
+# sudo visudo or sudo vi /etc/sudoers
+# %gitlab-runner ALL=(ALL) NOPASSWD: ALL
+
 stages:
-    - primal-dependencies
+    - qa-tools
     - dependencies
-    - compile
-    - test
+    - data-distribution-service
+    - feature-test
     - target-package
     - target-install
     - deploy
     - target-clean
 
-.dedicated-runner: &dedicated-runner
+.agent-47: &agent-47
     retry: 1
     tags:
         - agent-smith
-
-.default-cache: &default-cache
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-        - ${DEPS_INSTALL_DIR}
-
-.push-cache: &push-cache
-    cache:
-    <<: *default-cache
-    policy: push
-
-.pull-cache: &pull-cache
-    cache:
-    <<: *default-cache
-    policy: pull
 
 .only_stable: &only_stable
     only:
@@ -36,43 +25,51 @@ stages:
 .tumbleweed: &tumbleweed
     only:
         - develop
-        - /^feature-.*$/
-        - /^hotfix-.*$/
-        - /^bugfix-.*$/
-        - /^support-.*$/
-        - /^poc-.*$/
 
-.branch_exceptions: &branch_exceptions
-    only:
-        - branches
-    except:
-        - coverity_scan
+.parent-cache: &parent-cache
+    key: "Ubuntu-18-10-DDS-Dev-Tools" # ${CI_COMMIT_REF_SLUG}
+    paths:
+        - ${DEPS_INSTALL_DIR}/
 
-.swrs-swtp-swtr: &swrs-swtp-swtr
-    allow_failure: false
-    except:
-        variables:
-            - $CI_COMMIT_REF_NAME =~ /(^docs[\/-].*|.*-docs$)/
-            - $CI_COMMIT_REF_NAME =~ /(^qa[\/-].*|.*-qa$)/
+.artifacts-folder: &artifacts-folder
+    artifacts:
+        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
+        when: always
+        expire_in: 31d
+        paths:
+            - ${DEPS_INSTALL_DIR}
 
-    variables:
-        APPROUVAL: "DOCxxxx"
+.push-cache: &push-cache
+    cache:
+    <<: *parent-cache
+    policy: push
+
+.pull-cache: &pull-cache
+    cache:
+    <<: *parent-cache
+    policy: pull
+
+.build-metadata: &build-metadata
+    <<: *agent-47
+    <<: *pull-cache
+    stage: test
+
+variables:
+    DEPS_INSTALL_DIR: /opt/devslibs
+    # DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
 
 before_script:
-    - date
     - cmake --version
     - make --version
+    - date
+    - hostname
 
 after_script:
     - date
 
-variables:
-    DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
-#    DEPS_INSTALL_DIR: /home/gitlab-runner/$CI_COMMIT_REF_NAME
-
 uncrustify:
-    <<: *dedicated-runner 
-    stage: primal-dependencies
+    <<: *agent-47
+    stage: qa-tools
 
     before_script:
         - date -u
@@ -82,24 +79,18 @@ uncrustify:
         - git clone --depth=1 https://github.com/uncrustify/uncrustify.git
         - cd uncrustify
         - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
         - cmake --build build --target all --clean-first 
-        - cmake --build build --target install
+        - sudo cmake --build build --target install
         - cd ..
 
     after_script:
         - date -u
 
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
 
 cppcheck:
-    <<: *dedicated-runner 
-    stage: primal-dependencies
+    <<: *agent-47
+    stage: qa-tools
 
     before_script:
         - date -u
@@ -111,510 +102,9 @@ cppcheck:
         - cmake -E make_directory build
         - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
         - cmake --build build --target all --clean-first 
-        - cmake --build build --target install
-        - cp --recursive --verbose cfg  ${DEPS_INSTALL_DIR}/bin || true
+        - sudo cmake --build build --target install
+        - sudo cp --recursive --verbose cfg  ${DEPS_INSTALL_DIR}/bin || true
         - cd ..
 
     after_script:
         - date -u
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-doxygen:
-    <<: *dedicated-runner 
-    stage: primal-dependencies
-
-    before_script:
-        - date -u
-
-    script:
-        - cmake --version
-        - git clone --depth=1 https://github.com/doxygen/doxygen.git 
-        - cd doxygen
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
-
-    after_script:
-        - date -u
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-
-apache:
-    <<: *dedicated-runner
-    stage: primal-dependencies
-
-    before_script:
-        - date -u
-
-    script:
-        - echo "Building Apache Runtime Library"
-        - wget --quiet https://www-us.apache.org/dist/apr/apr-1.6.5.tar.gz
-        - tar -xvzf apr-1.6.5.tar.gz > /dev/null
-        - cd apr-1.6.5
-        - ./configure --prefix=${DEPS_INSTALL_DIR} --enable-threads --enable-posix-shm 
-            --enable-allocator-guard-pages --enable-pool-concurrency-check --enable-other-child
-        - make clean && make && make install
-        - cd ..
-
-        - echo "Building Expat Library"
-        - git clone --depth=1 https://github.com/libexpat/libexpat.git
-        - cd libexpat/expat
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ../../
-
-        - echo "Building Apache Runtime Utils Library"
-        - wget --quiet https://www-us.apache.org/dist//apr/apr-util-1.6.1.tar.gz
-        - tar -xvf apr-util-1.6.1.tar.gz > /dev/null
-        - cd apr-util-1.6.1
-        - ./configure --prefix=${DEPS_INSTALL_DIR} --with-apr=${DEPS_INSTALL_DIR}  --with-expat=${DEPS_INSTALL_DIR}
-        - make clean && make && make install
-        - cd ..
-
-        - echo "Building Apache logging library Log4cxx"
-        - git clone --depth=1 https://git-wip-us.apache.org/repos/asf/logging-log4cxx.git
-        - cd logging-log4cxx
-        - ./autogen.sh
-        - ./configure --prefix=${DEPS_INSTALL_DIR} --with-apr=${DEPS_INSTALL_DIR} 
-            --with-apr-util=${DEPS_INSTALL_DIR} --with-ODBC=no --with-SMTP=no 
-            --enable-char --enable-wchar_t 
-            --with-charset=utf-8 --with-logchar=utf-8
-        - make clean && make && make install
-        - cd ..
-
-    after_script:
-        - date -u
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-cpp-dev-utils:
-    <<: *dedicated-runner
-    stage: primal-dependencies
-
-    before_script:
-        - date -u
-
-    script:
-        - echo "Building Google Test"
-        - git clone --depth=1 --recurse-submodules https://github.com/google/googletest.git
-        - cd googletest
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
-
-        - echo "Building Google Bench Mark"
-        - git clone --depth=1 --recurse-submodules https://github.com/google/benchmark.git
-        - cd benchmark
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
-
-        - echo "Building Google crc32c Library"
-        - git clone --depth=1 --recurse-submodules https://github.com/google/crc32c.git
-        - cd crc32c
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
-
-        - echo "Building Google protocol buffer"
-        - git clone  --recurse-submodules --depth 1 https://github.com/protocolbuffers/protobuf.git
-        - cd protobuf
-        - ./autogen.sh
-        - ./configure --prefix=${DEPS_INSTALL_DIR}
-        - make clean && make && make install
-        - cd ..
-
-        - echo "Building Google StateChart"
-        - git clone --depth=1 https://github.com/google/statechart.git
-        - cd statechart
-        - cmake -E make_directory build
-#        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-#        - cmake --build build --target all --clean-first
-#        - cmake --build build --target install
-        - cd ..
-
-        - echo "Building Google Abseil CPP Library"
-        - git clone --depth=1 https://github.com/abseil/abseil-cpp.git
-        - cd abseil-cpp
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-#        - cmake --build build --target install
-        - cd ..
-
-        - echo "Building Google Capture Thread Library"
-        - git clone --depth=1 https://github.com/google/capture-thread.git
-        - cd capture-thread
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-#        - cmake --build build --target all --clean-first
-#        - cmake --build build --target install
-        - cd ..
-
-
-        - echo "Building American fuzzy lop"
-#        - curl -L -O -k http://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz
-#        - tar -xvzf afl-latest.tgz
-
-        - echo "Building A unit testing framework for C"
-        - git clone --depth=1 --recurse-submodules https://github.com/libcheck/check.git 
-        - cd check
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
-#        - cmake --build build --target all --clean-first
-#        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
-#        - cmake --build build --target install
-        - cd ..
-
-        - echo "Building The Linux perf GUI for performance analysis."
-        - git clone --depth=1 --recurse-submodules https://github.com/KDAB/hotspot.git 
-        - cd hotspot
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
-#        - cmake --build build --target all --clean-first
-#        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
-#        - cmake --build build --target install
-        - cd ..
-
-        - echo "Building The Linux perf GUI for performance analysis."
-        - git clone --depth=1 --recurse-submodules https://github.com/apitrace/apitrace.git 
-        - cd apitrace
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
-#        - cmake --build build --target all --clean-first
-#        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
-#        - cmake --build build --target install
-        - cd ..
-
-        - echo "Building IEEE doubles binary-decimal and decimal-binary ."
-        - git clone --depth=1 --recurse-submodules https://github.com/google/double-conversion.git 
-        - cd apitrace
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
-#        - cmake --build build --target all --clean-first
-#        - test/cctest/cctest --list | tr -d '<' | xargs test/cctest/cctest
-#        - cmake --build build --target install
-        - cd ..
-
-    after_script:
-        - date -u
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-boost-1.68:
-    <<: *dedicated-runner
-    stage: primal-dependencies
-    before_script:
-        - date -u
-    script:
-        - cmake --version
-        - echo "Building Boost latest"
-        - wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
-        - tar -xvf boost_1_68_0.tar.gz > /dev/null
-        - cd boost_1_68_0
-#[--with-libraries=program_options,filesystem,system,date-time,regex,thread]
-        - ./bootstrap.sh --prefix=${DEPS_INSTALL_DIR} --with-python=python3
-        - ./b2 link=shared threading=multi variant=release
-#        - ./b2 install --prefix=${DEPS_INSTALL_DIR}
-        - ./b2 install
-        - cd ..
-
-    after_script:
-        - date -u
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-eprosima-dds:
-    <<: *dedicated-runner
-    stage: dependencies
-
-    before_script:
-        - date -u
-
-    script:
-        - cmake --version
-        - git clone --depth=1 --recurse-submodules https://github.com/eProsima/Fast-RTPS.git
-        - cd Fast-RTPS
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DTHIRDPARTY=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}/eprosima
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
-
-    after_script:
-        - date -u
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-OpenDDS:
-    <<: *dedicated-runner
-    stage: dependencies
-    variables:
-        ACE_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/ACE
-        TAO_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/TAO
-        MPC_ROOT: ${CI_PROJECT_DIR}/MPC
-
-    before_script:
-        - date -u
-        - LD_LIBRARY_PATH=$ACE_ROOT/lib:$LD_LIBRARY_PATH
-        - if [[ "${COMPILER_CC}" != "" ]]; then export CC=${COMPILER_CC}; fi
-        - if [[ "${COMPILER_CXX}" != "" ]]; then export CXX=${COMPILER_CXX}; fi
-        - export CC=gcc-8
-        - export CXX=g++-8
-        - export CCOV=gcov-8
-        - export AR=gcc-ar-8
-        - export RANLIB=gcc-ranlib-8
-    script:
-        - echo "Building Xerces for DDS"
-        - wget --quiet http://www-us.apache.org/dist//xerces/c/3/sources/xerces-c-3.2.2.tar.gz
-        - tar -xvzf xerces-c-3.2.2.tar.gz > /dev/null
-        - cd xerces-c-3.2.2/
-        - ./configure --prefix=${DEPS_INSTALL_DIR}
-            --enable-static --enable-shared --enable-netaccessor-socket
-            --enable-transcoder-gnuiconv --enable-transcoder-iconv
-            --enable-msgloader-inmemory --enable-xmlch-uint16_t --enable-xmlch-char16_t
-        # - make -j2 | tee $CI_PROJECT_NAMESPACE/build-logs/xerces-build.log
-        # - make install | tee -a $CI_PROJECT_NAMESPACE/build-logs/xerces-build.log
-        - make clean && make && make install
-        - cd ..
-
-        - echo "Building Wireshark for DDs Dissectors"
-#        - sudo apt-get install libpulse-dev
-        - git clone --depth=1 --recurse-submodules https://code.wireshark.org/review/p/wireshark.git
-        - cd wireshark
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
-
-        - echo "Cloning MPC for DDS"
-        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/MPC.git
-
-        - echo "Cloning ACE TAO for DDS"
-        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/ACE_TAO.git
-
-        - echo "Cloning CIAO for DDS"
-        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/CIAO.git
-
-        - echo "Cloning DANCE for DDS"
-        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/DAnCE.git
-
-        - echo "Cloning mFAST encoding/decoding library"
-        - git clone --depth=1 --recursive https://github.com/objectcomputing/mFAST.git
-        - cd mFAST
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
-
-        - echo "Cloning OpenDDS"
-        - git clone --depth=1 --recurse-submodules https://github.com/objectcomputing/OpenDDS.git
-        - echo "Building OpenDDS"
-        - ./configure -std=c++11 --ipv6 --openssl --xerces3 --rapidjson --glib --boost
-            --no-tests --ace=$ACE_ROOT --tao=$TAO_ROOT --mpc=$MPC_ROOT
-            --prefix=${DEPS_INSTALL_DIR}/opendds
-        - make clean && make && make install
-        - cd ..
-
-    after_script:
-        - date -u
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-vortex-opensplice-dds:
-    stage: dependencies
-
-    before_script:
-        - date -u
-#        - export PROTOBUF_HOME=`pwd`
-#        sudo apt-get install python-wheel cython cython3 python3-wheel  #build Python DCPS API
-#        export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
-#        export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
-        - export  PROTOBUF_HOME=${DEPS_INSTALL_DIR}
-    script:
-        - git clone --depth=1 --recurse-submodules https://github.com/ADLINK-IST/opensplice.git
-        - cd opensplice
-        - ./configure x86_64.linux-release --prefix=${DEPS_INSTALL_DIR}
-        - source envs-x86_64.linux-release.sh
-        - make && make install
-        - cd ..
-
-    after_script:
-        - date -u
-        - mkdir -pv ${DEPS_INSTALL_DIR}/adlinktech
-        - cp -v envs-x86_64.linux-release.sh ${DEPS_INSTALL_DIR}/adlinktech
-        - cp -Rv install/HDE ${DEPS_INSTALL_DIR}/adlinktech
-        - cp -Rv install/RTS ${DEPS_INSTALL_DIR}/adlinktech
-        - cp -Rv install/VS ${DEPS_INSTALL_DIR}/adlinktech
-    tags:
-        - agent-smith
-
-    artifacts:
-        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
-        paths:
-            - ${CI_PROJECT_DIR}/devslibs
-            - ${DEPS_INSTALL_DIR}
-            - opensplice/envs-x86_64.linux-release.sh
-            - opensplice/install/HDE
-            - opensplice/install/RTS
-            - opensplice/install/VS
-
-compile:
-    <<: *dedicated-runner
-    variables:
-        JOB_DATE: "date +%Y-%m-%d-%H:%M:%S"
-    stage: compile
-
-    before_script:
-        - echo $CI_PIPELINE_ID
-        - echo "Initialize ${CI_PROJECT_NAME} build state, e.g. set properties or create directories."
-    script:
-        - uname -a
-        # - cmake -E cmake_echo_color --cyan "$BUILD_DIRECTORY"
-        # - cmake -E make_directory ${BUILD_DIRECTORY}
-        # - cmake -E chdir $BUILD_DIRECTORY cmake -G "Unix Makefiles"
-                # -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                # -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-                # -DCMAKE_INSTALL_PREFIX=$HOME/${CI_PROJECT_NAME}_install/ ..
-    after_script:
-        - echo "Project initialization done"
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-unit-testing:
-    <<: *dedicated-runner
-    variables:
-        JOB_DATE: "date +%Y-%m-%d-%H:%M:%S"
-        TEST_ARGS: "--iterration 1 --outputpath $BUILD_DIRECTORY --module dummy"
-    stage: test
-    before_script:
-        - echo  "Run tests using a suitable unit testing framework. These tests should not require the code be packaged or deployed."
-    script:
-        - hostname
-#        - make -C $BUILD_DIRECTORY test ARGS="--extra-verbose"
-#        - cmake --build $BUILD_DIRECTORY --target test
-#        - ctest $BUILD_DIRECTORY -V --build-and-test
-#        - cmake --build $BUILD_DIRECTORY --target test -- ARGS="$TEST_ARGS"
-#        - cmake -E env CTEST_OUTPUT_ON_FAILURE=TRUE cmake --build $BUILD_DIRECTORY --target test
-    # dependencies:
-        # - test-compile
-    after_script:
-        - echo " ${CI_PROJECT_NAME} Unit testing done."
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-target-package:
-    <<: *dedicated-runner
-    variables:
-        JOB_DATE: "date +%Y-%m-%d-%H:%M:%S"
-    stage: target-package
-    before_script:
-        - echo "Execute processes needed to finalize the project cleaning."
-    script:
-        - uname -a
-    after_script:
-        - echo "Done."
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-target-install:
-    <<: *dedicated-runner
-    variables:
-        JOB_DATE: "date +%Y-%m-%d-%H:%M:%S"
-    stage: target-install
-    before_script:
-        - echo "Execute processes needed to finalize the project cleaning."
-    script:
-        - uname -a
-    after_script:
-        - echo "Done."
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
-
-target-deploy:
-    <<: *dedicated-runner
-    variables:
-        JOB_DATE: "date +%Y-%m-%d-%H:%M:%S"
-    stage: deploy
-    before_script:
-        - echo "Execute processes needed to finalize the project cleaning."
-    script:
-        - uname -a
-    after_script:
-        - echo "Done."
-
-    artifacts:
-        name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
-        when: always
-        expire_in: 31d
-        paths:
-            - ${DEPS_INSTALL_DIR}
