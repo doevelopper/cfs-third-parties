@@ -192,7 +192,7 @@ testing-utils:
 
     before_script:
         - date -u
-
+        - export CMAKE_PREFIX_PATH=${DEPS_INSTALL_DIR}:$CMAKE_PREFIX_PATH
     script:
         - echo "Building Google Test"
         - git clone --depth=1 https://github.com/abseil/googletest.git
