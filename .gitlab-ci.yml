@@ -54,10 +54,12 @@ stages:
     <<: *pull-cache
     stage: test
 
-variables:
+common-variables: &common-variables
+    variables:
     # DEPS_INSTALL_DIR: /opt/devslibs
     # DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
-    DEPS_INSTALL_DIR: ${HOME}/devslibs
+    # DEPS_INSTALL_DIR: ${HOME}/devslibs
+        DEPS_INSTALL_DIR: ~/devslibs
 
 before_script:
     - cmake --version
@@ -70,6 +72,7 @@ after_script:
 
 uncrustify:
     <<: *agent-47
+    <<: *common-variables
     stage: qa-tools
 
     before_script:
@@ -80,7 +83,7 @@ uncrustify:
         - git clone --depth=1 https://github.com/uncrustify/uncrustify.git
         - cd uncrustify
         - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
         - cmake --build build --target all --clean-first 
         - cmake --build build --target install
         - cd ..
@@ -91,6 +94,7 @@ uncrustify:
 
 cppcheck:
     <<: *agent-47
+    <<: *common-variables
     stage: qa-tools
 
     before_script:
@@ -112,6 +116,7 @@ cppcheck:
 
 doxygen:
     <<: *agent-47
+    <<: *common-variables
     stage: qa-tools
 
     before_script:
