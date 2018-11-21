@@ -73,6 +73,7 @@ uncrustify:
 
     before_script:
         - date -u
+        - mkdir -pv ${DEPS_INSTALL_DIR}
 
     script:
         - cmake --version
