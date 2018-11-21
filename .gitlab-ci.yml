@@ -111,7 +111,7 @@ cppcheck:
         - date -u
 
 doxygen:
-    <<: *dedicated-runner 
+    <<: *agent-47
     stage: primal-dependencies
 
     before_script:
