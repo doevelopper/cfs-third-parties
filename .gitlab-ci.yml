@@ -112,7 +112,7 @@ cppcheck:
 
 doxygen:
     <<: *agent-47
-    stage: primal-dependencies
+    stage: qa-tools
 
     before_script:
         - date -u
