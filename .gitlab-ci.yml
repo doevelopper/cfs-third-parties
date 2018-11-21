@@ -54,7 +54,7 @@ stages:
     <<: *pull-cache
     stage: test
 
-common-variables: &common-variables
+.common-variables: &common-variables
     variables:
     # DEPS_INSTALL_DIR: /opt/devslibs
     # DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
