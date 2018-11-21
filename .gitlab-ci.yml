@@ -4,6 +4,7 @@
 
 stages:
     - qa-tools
+    - testing-tools
     - dependencies
     - data-distribution-service
     - feature-test
@@ -134,3 +135,434 @@ doxygen:
 
     after_script:
         - date -u
+
+apache-utils:
+    <<: *agent-47
+    <<: *common-variables
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - echo "Building Apache Runtime Library"
+        - wget --quiet https://www-us.apache.org/dist/apr/apr-1.6.5.tar.gz
+        - tar -xvzf apr-1.6.5.tar.gz > /dev/null
+        - cd apr-1.6.5
+        - ./configure --prefix=${DEPS_INSTALL_DIR} --enable-threads --enable-posix-shm 
+            --enable-allocator-guard-pages --enable-pool-concurrency-check --enable-other-child
+        - make clean && make && make install
+        - cd ..
+
+        - echo "Building Expat Library"
+        - git clone --depth=1 https://github.com/libexpat/libexpat.git
+        - cd libexpat/expat
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ../../
+
+        - echo "Building Apache Runtime Utils Library"
+        - wget --quiet https://www-us.apache.org/dist//apr/apr-util-1.6.1.tar.gz
+        - tar -xvf apr-util-1.6.1.tar.gz > /dev/null
+        - cd apr-util-1.6.1
+        - ./configure --prefix=${DEPS_INSTALL_DIR} --with-apr=${DEPS_INSTALL_DIR}  --with-expat=${DEPS_INSTALL_DIR}
+        - make clean && make && make install
+        - cd ..
+
+        - echo "Building Apache logging library Log4cxx"
+        - git clone --depth=1 https://git-wip-us.apache.org/repos/asf/logging-log4cxx.git
+        - cd logging-log4cxx
+        - ./autogen.sh
+        - ./configure --prefix=${DEPS_INSTALL_DIR} --with-apr=${DEPS_INSTALL_DIR} 
+            --with-apr-util=${DEPS_INSTALL_DIR} --with-ODBC=no --with-SMTP=no 
+            --enable-char --enable-wchar_t 
+            --with-charset=utf-8 --with-logchar=utf-8
+        - make clean && make && make install
+        - cd ..
+
+    after_script:
+        - date -u
+
+testing-utils:
+    <<: *agent-47
+    <<: *common-variables
+    stage: testing-tools
+
+    before_script:
+        - date -u
+
+    script:
+        - echo "Building Google Test"
+        - git clone --depth=1 https://github.com/abseil/googletest.git
+        - cd googletest
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google Bench Mark"
+        - git clone --depth=1 https://github.com/google/benchmark.git
+        - cd benchmark
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google glog Library"
+        - git clone --depth=1 https://github.com/google/glog.git
+        - cd glog
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google crc32c Library"
+        - git clone --depth=1 https://github.com/google/crc32c.git
+        - cd crc32c
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google StateChart"
+        - git clone --depth=1 https://github.com/google/statechart.git
+        - cd statechart
+        - cmake -E make_directory build
+#        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+#        - cmake --build build --target all --clean-first
+#        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google Abseil CPP Library"
+        - git clone --depth=1 https://github.com/abseil/abseil-cpp.git
+        - cd abseil-cpp
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        # - cmake --build build --target all --clean-first
+#        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building Google Capture Thread Library"
+        - git clone --depth=1 https://github.com/google/capture-thread.git
+        - cd capture-thread
+        - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+#        - cmake --build build --target all --clean-first
+#        - cmake --build build --target install
+        - cd ..
+
+        - echo "Building American fuzzy lop"
+        # - curl -L -O -k http://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz
+        ## - tar zxvf afl-latest.tgz --one-top-level=american-fuzzy-lop
+        # - tar -xvzf afl-latest.tgz
+        # - cd afl-2.52b
+        # - make clean && make && make BINDIR=${DEPS_INSTALL_DIR}/bin DATAROOTDIR=${DEPS_INSTALL_DIR}/share LIBDIR=${DEPS_INSTALL_DIR}/lib install
+#         - cd ..
+
+        - echo "Building A unit testing framework for C"
+        # - git clone --depth=1 https://github.com/libcheck/check.git
+        # - cd check
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        # - cmake --build build --target all --clean-first
+        # - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
+        # - cmake --build build --target install || true
+#         - cd ..
+
+        - echo "Building The Linux perf GUI for performance analysis."
+        # - git clone --depth=1 --recurse-submodules https://github.com/KDAB/hotspot.git
+        # - cd hotspot
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+#        - cmake --build build --target all --clean-first
+#        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
+#        - cmake --build build --target install
+#         - cd ..
+
+        - echo "Building The Linux perf GUI for performance analysis."
+        # - git clone --depth=1 --recurse-submodules https://github.com/apitrace/apitrace.git
+        # - cd apitrace
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+#        - cmake --build build --target all --clean-first
+#        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
+#        - cmake --build build --target install
+#         - cd ..
+
+        - echo "Building IEEE doubles binary-decimal and decimal-binary ."
+        # - git clone --depth=1 https://github.com/google/double-conversion.git 
+        # - cd double-conversion
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+#        - cmake --build build --target all --clean-first
+#        - test/cctest/cctest --list | tr -d '<' | xargs test/cctest/cctest
+#        - cmake --build build --target install
+#         - cd ..
+
+    after_script:
+        - date -u
+
+.protocol-buffers:
+    <<: *agent-47
+    <<: *common-variables
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - cmake --version
+        - echo "Buildinggoogle protocol buffer"
+        - git clone --depth=1 https://github.com/protocolbuffers/protobuf.git
+        - cd protobuf
+        - ./autogen.sh
+        - ./configure --prefix=${DEPS_INSTALL_DIR}
+        - make clean && make && make install
+        - cd ..
+
+    after_script:
+        - date -u
+
+.boost:
+    <<: *agent-47
+    <<: *common-variables
+    stage: dependencies
+    before_script:
+        - date -u
+    script:
+        - cmake --version
+        - echo "Building Boost latest"
+        - curl -L -O -k https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+        - tar -xvf boost_1_68_0.tar.gz > /dev/null
+        - cd boost_1_68_0
+#[--with-libraries=program_options,filesystem,system,date-time,regex,thread]
+        - ./bootstrap.sh --prefix=${DEPS_INSTALL_DIR} --with-python=python3
+        - ./b2 link=shared threading=multi variant=release
+        - ./b2 install --prefix=${DEPS_INSTALL_DIR}
+        - cd ..
+
+    after_script:
+        - date -u
+
+.Xerces:
+    <<: *agent-47
+    <<: *common-variables
+    stage: dependencies
+    before_script:
+        - date -u
+    script:
+        - echo "Building Xerces for DDS"
+        - curl -L -O http://www-us.apache.org/dist//xerces/c/3/sources/xerces-c-3.2.2.tar.gz
+        - tar -xvzf xerces-c-3.2.2.tar.gz  > /dev/null
+        - cd xerces-c-3.2.2/
+        - ./configure --prefix=${DEPS_INSTALL_DIR}
+            --enable-static --enable-shared --enable-netaccessor-socket
+            --enable-transcoder-gnuiconv --enable-transcoder-iconv
+            --enable-msgloader-inmemory --enable-xmlch-uint16_t --enable-xmlch-char16_t
+        # - make -j2 | tee $CI_PROJECT_NAMESPACE/build-logs/xerces-build.log
+        # - make install | tee -a $CI_PROJECT_NAMESPACE/build-logs/xerces-build.log
+        - make clean && make && make install
+        - cd ..
+    after_script:
+        - date -u
+
+.wireshark:
+    <<: *agent-47
+    <<: *common-variables
+    stage: dependencies
+    before_script:
+        - date -u
+        - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
+        - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
+    script:
+        - echo "Building Wireshark for DDs Dissectors"
+#        - sudo apt-get install libpulse-dev
+        - GIT_SSL_NO_VERIFY=1 git clone --depth=1 --recurse-submodules https://github.com/wireshark/wireshark.git
+        - cd wireshark
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+    after_script:
+        - date -u
+
+.eprosima-dds:
+    <<: *agent-47
+    <<: *common-variables
+    stage: data-distribution-service
+
+    before_script:
+        - date -u
+
+    script:
+        - cmake --version
+        - git clone --depth=1 --recurse-submodules https://github.com/eProsima/Fast-RTPS.git
+        - cd Fast-RTPS
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DTHIRDPARTY=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}/eprosima
+        - cmake --build build --target all --clean-first
+        - sudo cmake --build build --target install
+        - cd ..
+
+    after_script:
+        - date -u
+
+.OpenDDS:
+    <<: *agent-47
+    <<: *common-variables
+    dependencies:
+        - tools-libs
+        - boost
+        - protocol-buffers
+        - Xerces
+        - Wireshark
+
+    variables:
+        ACE_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/ACE
+        TAO_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/TAO
+        MPC_ROOT: ${CI_PROJECT_DIR}/MPC
+        LD_LIBRARY_PATH: $ACE_ROOT/lib:$LD_LIBRARY_PATH
+        COMPILER: g++-8
+    stage: data-distribution-service
+
+    before_script:
+        - date -u
+        - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
+        - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
+
+    script:
+        - echo "Cloning MPC for DDS"
+        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/MPC.git
+
+        - echo "Cloning ACE TAO for DDS"
+        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/ACE_TAO.git
+
+        - echo "Cloning CIAO for DDS"
+        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/CIAO.git
+
+        - echo "Cloning DANCE for DDS"
+        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/DAnCE.git
+
+        - echo "Cloning mFAST encoding/decoding library"
+        - git clone --depth=1 --recursive https://github.com/objectcomputing/mFAST.git
+        - cd mFAST
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ..
+
+        - echo "Cloning OpenDDS"
+        - git clone --depth=1 https://github.com/objectcomputing/OpenDDS.git
+        - git clone --depth=1 https://github.com/Tencent/rapidjson.git OpenDDS/tools/IntermediateTypeLang/cpp/rapidjson
+        - echo "Building OpenDDS"
+        - cd OpenDDS
+        - ./configure --help
+        - ./configure -std=c++11 --ipv6 --openssl --xerces3 --rapidjson --glib --boost
+            --no-tests --ace=$ACE_ROOT --tao=$TAO_ROOT --mpc=$MPC_ROOT
+            --prefix=${DEPS_INSTALL_DIR}/opendds
+
+        - make clean && make && make install
+        - cd ..
+
+    after_script:
+        - date -u
+
+.vortex-opensplice-dds:
+    <<: *agent-47
+    <<: *common-variables
+    stage: data-distribution-service
+    dependencies:
+        - protocol-buffers
+
+    before_script:
+        - date -u
+        - export {http,https,ftp}_proxy=[HOST]:[PORT]
+#        sudo apt-get install python-wheel cython cython3 python3-wheel  #build Python DCPS API
+        # - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
+        # - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
+#        - export PROTOBUF_HOME=`pwd`
+        - export  PROTOBUF_HOME=${DEPS_INSTALL_DIR}
+
+    script:
+        - git clone --depth=1 https://github.com/ADLINK-IST/opensplice.git --config [HOST]:[PORT]
+        - mkdir -pv submods/MPC_ROOT
+        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/MPC.git submods/MPC_ROOT
+        - cd opensplice
+        - ./configure x86_64.linux-release
+        - source envs-x86_64.linux-release.sh
+        - make && make install
+        - cd ..
+
+    after_script:
+        - date -u
+        # - mkdir -pv ${DEPS_INSTALL_DIR}/adlinktech
+        # - cp -v envs-x86_64.linux-release.sh ${DEPS_INSTALL_DIR}/adlinktech
+        # - cp -Rv opensplice/install/HDE ${DEPS_INSTALL_DIR}/adlinktech
+        # - cp -Rv opensplice/install/RTS ${DEPS_INSTALL_DIR}/adlinktech
+        # - cp -Rv opensplice/install/VS ${DEPS_INSTALL_DIR}/adlinktech
+
+    artifacts:
+        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+        paths:
+            - ${DEPS_INSTALL_DIR}
+            - opensplice/envs-x86_64.linux-release.sh
+            - opensplice/install/HDE
+            - opensplice/install/RTS
+            - opensplice/install/VS
+
+eprosima-dds-feature-test:
+    <<: *agent-47
+    stage: feature-test
+    before_script:
+        - echo  "Testing Fast RTPS Features."
+
+    script:
+        - echo  "Building and testing Fast RTPS Features."
+
+    after_script:
+        - echo  "Testing Fast RTPS Features Done."
+
+openDDS-Feature-Test:
+    <<: *agent-47
+    stage: feature-test
+    before_script:
+        - echo  "Testing OpenDDS Features."
+
+    script:
+        - echo  "Building and testing Fast RTPS Features."
+
+    after_script:
+        - echo  "Testing Fast RTPS Features Done."
+
+Vortex-OpenSPlice-Feature-Test:
+    <<: *agent-47
+    stage: feature-test
+    before_script:
+        - echo  "Testing AdLinkTech DDS Features."
+
+    script:
+        - echo  "Building and testing AdLinkTech Features."
+
+    after_script:
+        - echo  "Testing AdLinkTech Features Done."
+
+RTI-DDS-connex-Feature-Test:
+    <<: *agent-47
+    stage: feature-test
+    before_script:
+        - echo  "Testing RTI DDS connex Features."
+
+    script:
+        - echo  "Building and testing RTI DDS connex Features."
+
+    after_script:
+        - echo  "Testing RTI DDS connex Features Done."
