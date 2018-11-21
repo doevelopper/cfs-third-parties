@@ -13,7 +13,7 @@ stages:
     - target-clean
 
 .agent-47: &agent-47
-    retry: 1
+#    retry: 1
     tags:
         - agent-smith
 
@@ -55,8 +55,9 @@ stages:
     stage: test
 
 variables:
-    DEPS_INSTALL_DIR: /opt/devslibs
+    # DEPS_INSTALL_DIR: /opt/devslibs
     # DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
+    DEPS_INSTALL_DIR: ${HOME}/devslibs
 
 before_script:
     - cmake --version
@@ -73,7 +74,7 @@ uncrustify:
 
     before_script:
         - date -u
-        - sudo mkdir -pv ${DEPS_INSTALL_DIR}
+#        - mkdir -pv ${DEPS_INSTALL_DIR}
 
     script:
         - cmake --version
@@ -82,7 +83,7 @@ uncrustify:
         - cmake -E make_directory build
         - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
         - cmake --build build --target all --clean-first 
-        - sudo cmake --build build --target install
+        - cmake --build build --target install
         - cd ..
 
     after_script:
