@@ -3,8 +3,8 @@
 # %gitlab-runner ALL=(ALL) NOPASSWD: ALL
 
 stages:
-    - qa-tools
-    - testing-tools
+    - sw-quality-tools
+    - dev-utils
     - dependencies
     - data-distribution-service
     - feature-test
@@ -27,12 +27,7 @@ stages:
     only:
         - develop
 
-.parent-cache: &parent-cache
-    key: "Ubuntu-18-10-DDS-Dev-Tools" # ${CI_COMMIT_REF_SLUG}
-    paths:
-        - ${DEPS_INSTALL_DIR}/
-
-.artifacts-folder: &artifacts-folder
+.artifacts: &artifacts
     artifacts:
         name: "${CI_JOB_NAME}_${CI_COMIT_REF_NAME}_${CI_COMMIT_SHA}"
         when: always
@@ -40,27 +35,34 @@ stages:
         paths:
             - ${DEPS_INSTALL_DIR}
 
+.3rd-party-cache: &3rd-party-cache
+#    key: # ${CI_COMMIT_REF_SLUG} # Cache in between builds
+    key: "Ubuntu-18-10-DDS-Dev-Tools" # ${CI_COMMIT_REF_SLUG} # Cache in between builds
+    paths:
+        - ${DEPS_INSTALL_DIR}/
+
+.variables: &variables
+    variables:
+#        DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
+    # DEPS_INSTALL_DIR: /opt/devslibs
+    # DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
+    # DEPS_INSTALL_DIR: ${HOME}/devslibs
+        DEPS_INSTALL_DIR: /home/gitlab-runner/third-party-software-component
+
 .push-cache: &push-cache
     cache:
-    <<: *parent-cache
+    <<: *3rd-party-cache
     policy: push
 
 .pull-cache: &pull-cache
     cache:
-    <<: *parent-cache
+    <<: *3rd-party-cache
     policy: pull
 
 .build-metadata: &build-metadata
     <<: *agent-47
     <<: *pull-cache
     stage: test
-
-.common-variables: &common-variables
-    variables:
-    # DEPS_INSTALL_DIR: /opt/devslibs
-    # DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
-    # DEPS_INSTALL_DIR: ${HOME}/devslibs
-        DEPS_INSTALL_DIR: ~/devslibs
 
 before_script:
     - cmake --version
@@ -73,8 +75,8 @@ after_script:
 
 .uncrustify:
     <<: *agent-47
-    <<: *common-variables
-    stage: qa-tools
+    <<: *variables
+    stage: sw-quality-tools
 
     before_script:
         - date -u
@@ -95,8 +97,8 @@ after_script:
 
 .cppcheck:
     <<: *agent-47
-    <<: *common-variables
-    stage: qa-tools
+    <<: *variables
+    stage: sw-quality-tools
 
     before_script:
         - date -u
@@ -117,8 +119,8 @@ after_script:
 
 .doxygen:
     <<: *agent-47
-    <<: *common-variables
-    stage: qa-tools
+    <<: *variables
+    stage: sw-quality-tools
 
     before_script:
         - date -u
@@ -136,59 +138,10 @@ after_script:
     after_script:
         - date -u
 
-.apache-utils:
+testing-tools-libraries:
     <<: *agent-47
-    <<: *common-variables
-    stage: dependencies
-
-    before_script:
-        - date -u
-
-    script:
-        - echo "Building Apache Runtime Library"
-        - wget --quiet https://www-us.apache.org/dist/apr/apr-1.6.5.tar.gz
-        - tar -xvzf apr-1.6.5.tar.gz > /dev/null
-        - cd apr-1.6.5
-        - ./configure --prefix=${DEPS_INSTALL_DIR} --enable-threads --enable-posix-shm 
-            --enable-allocator-guard-pages --enable-pool-concurrency-check --enable-other-child
-        - make clean && make && make install
-        - cd ..
-
-        - echo "Building Expat Library"
-        - git clone --depth=1 https://github.com/libexpat/libexpat.git
-        - cd libexpat/expat
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ../../
-
-        - echo "Building Apache Runtime Utils Library"
-        - wget --quiet https://www-us.apache.org/dist//apr/apr-util-1.6.1.tar.gz
-        - tar -xvf apr-util-1.6.1.tar.gz > /dev/null
-        - cd apr-util-1.6.1
-        - ./configure --prefix=${DEPS_INSTALL_DIR} --with-apr=${DEPS_INSTALL_DIR}  --with-expat=${DEPS_INSTALL_DIR}
-        - make clean && make && make install
-        - cd ..
-
-        - echo "Building Apache logging library Log4cxx"
-        - git clone --depth=1 https://git-wip-us.apache.org/repos/asf/logging-log4cxx.git
-        - cd logging-log4cxx
-        - ./autogen.sh
-        - ./configure --prefix=${DEPS_INSTALL_DIR} --with-apr=${DEPS_INSTALL_DIR} 
-            --with-apr-util=${DEPS_INSTALL_DIR} --with-ODBC=no --with-SMTP=no 
-            --enable-char --enable-wchar_t 
-            --with-charset=utf-8 --with-logchar=utf-8
-        - make clean && make && make install
-        - cd ..
-
-    after_script:
-        - date -u
-
-testing-utils:
-    <<: *agent-47
-    <<: *common-variables
-    stage: testing-tools
+    <<: *variables
+    stage: dev-utils
 
     before_script:
         - date -u
@@ -239,14 +192,14 @@ testing-utils:
 #        - cmake --build build --target install
         - cd ..
 
-        - echo "Building Google Abseil CPP Library"
-        - git clone --depth=1 --recurse-submodules  https://github.com/abseil/abseil-cpp.git
-        - cd abseil-cpp
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
+        # - echo "Building Google Abseil CPP Library"
+        # - git clone --depth=1 --recurse-submodules  https://github.com/abseil/abseil-cpp.git
+        # - cd abseil-cpp
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        # - cmake --build build --target all --clean-first
+        # - cmake --build build --target install
+        # - cd ..
 
         - echo "Building Google Capture Thread Library"
         - git clone --depth=1 --recurse-submodules  https://github.com/google/capture-thread.git
@@ -308,9 +261,58 @@ testing-utils:
     after_script:
         - date -u
 
+.logging utils:
+    <<: *agent-47
+    <<: *variables
+    stage: dependencies
+
+    before_script:
+        - date -u
+
+    script:
+        - echo "Building Apache Runtime Library"
+        - wget --quiet https://www-us.apache.org/dist/apr/apr-1.6.5.tar.gz
+        - tar -xvzf apr-1.6.5.tar.gz > /dev/null
+        - cd apr-1.6.5
+        - ./configure --prefix=${DEPS_INSTALL_DIR} --enable-threads --enable-posix-shm 
+            --enable-allocator-guard-pages --enable-pool-concurrency-check --enable-other-child
+        - make clean && make && make install
+        - cd ..
+
+        - echo "Building Expat Library"
+        - git clone --depth=1 https://github.com/libexpat/libexpat.git
+        - cd libexpat/expat
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install
+        - cd ../../
+
+        - echo "Building Apache Runtime Utils Library"
+        - wget --quiet https://www-us.apache.org/dist//apr/apr-util-1.6.1.tar.gz
+        - tar -xvf apr-util-1.6.1.tar.gz > /dev/null
+        - cd apr-util-1.6.1
+        - ./configure --prefix=${DEPS_INSTALL_DIR} --with-apr=${DEPS_INSTALL_DIR}  --with-expat=${DEPS_INSTALL_DIR}
+        - make clean && make && make install
+        - cd ..
+
+        - echo "Building Apache logging library Log4cxx"
+        - git clone --depth=1 https://gitbox.apache.org/repos/asf/logging-log4cxx.git
+        - cd logging-log4cxx
+        - ./autogen.sh
+        - ./configure --prefix=${DEPS_INSTALL_DIR} --with-apr=${DEPS_INSTALL_DIR} 
+            --with-apr-util=${DEPS_INSTALL_DIR} --with-ODBC=no --with-SMTP=no 
+            --enable-char --enable-wchar_t 
+            --with-charset=utf-8 --with-logchar=utf-8
+        - make clean && make && make install
+        - cd ..
+
+    after_script:
+        - date -u
+
 .protocol-buffers:
     <<: *agent-47
-    <<: *common-variables
+    <<: *variables
     stage: dependencies
 
     before_script:
@@ -331,7 +333,7 @@ testing-utils:
 
 .boost:
     <<: *agent-47
-    <<: *common-variables
+    <<: *variables
     stage: dependencies
     before_script:
         - date -u
@@ -352,7 +354,7 @@ testing-utils:
 
 .xerces:
     <<: *agent-47
-    <<: *common-variables
+    <<: *variables
     stage: dependencies
     before_script:
         - date -u
@@ -374,7 +376,7 @@ testing-utils:
 
 .wireshark:
     <<: *agent-47
-    <<: *common-variables
+    <<: *variables
     stage: dependencies
     before_script:
         - date -u
@@ -396,7 +398,7 @@ testing-utils:
 
 .eprosima-dds:
     <<: *agent-47
-    <<: *common-variables
+    <<: *variables
     stage: data-distribution-service
 
     before_script:
@@ -409,7 +411,7 @@ testing-utils:
         - cmake -E make_directory build
         - cmake -E chdir build cmake .. -DTHIRDPARTY=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}/eprosima
         - cmake --build build --target all --clean-first
-        - sudo cmake --build build --target install
+        - cmake --build build --target install
         - cd ..
 
     after_script:
@@ -417,9 +419,9 @@ testing-utils:
 
 .OpenDDS:
     <<: *agent-47
-    <<: *common-variables
+    <<: *variables
     dependencies:
-        - testing-utils
+        - testing-tools-libraries
         - boost
         - protocol-buffers
         - xerces
@@ -478,7 +480,7 @@ testing-utils:
 
 .vortex-opensplice-dds:
     <<: *agent-47
-    <<: *common-variables
+    <<: *variables
     stage: data-distribution-service
     dependencies:
         - protocol-buffers
@@ -512,7 +514,7 @@ testing-utils:
     artifacts:
         name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
         paths:
-            - ${DEPS_INSTALL_DIR}
+#            - ${DEPS_INSTALL_DIR}
             - opensplice/envs-x86_64.linux-release.sh
             - opensplice/install/HDE
             - opensplice/install/RTS
@@ -542,7 +544,7 @@ openDDS-Feature-Test:
     after_script:
         - echo  "Testing Fast RTPS Features Done."
 
-Vortex-OpenSPlice-Feature-Test:
+Vortex-OpenSplice-Feature-Test:
     <<: *agent-47
     stage: feature-test
     before_script:
