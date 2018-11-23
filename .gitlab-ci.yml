@@ -420,7 +420,7 @@ after_script:
     after_script:
         - date -u
 
-.OpenDDS:
+OpenDDS:
     <<: *agent-47
     <<: *variables
     variables:
