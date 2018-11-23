@@ -147,41 +147,41 @@ testing-tools-libraries:
         - date -u
         - export CMAKE_PREFIX_PATH=${DEPS_INSTALL_DIR}:$CMAKE_PREFIX_PATH
     script:
-        - echo "Building Google Test"
-        - git clone --depth=1 https://github.com/abseil/googletest.git
-        - cd googletest
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
+        # - echo "Building Google Test"
+        # - git clone --depth=1 https://github.com/abseil/googletest.git
+        # - cd googletest
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        # - cmake --build build --target all --clean-first
+        # - cmake --build build --target install
+        # - cd ..
 
-        - echo "Building Google Bench Mark"
-        - git clone --depth=1 https://github.com/google/benchmark.git
-        - cd benchmark
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
+        # - echo "Building Google Bench Mark"
+        # - git clone --depth=1 https://github.com/google/benchmark.git
+        # - cd benchmark
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        # - cmake --build build --target all --clean-first
+        # - cmake --build build --target install
+        # - cd ..
 
-        - echo "Building Google glog Library"
-        - git clone --depth=1 https://github.com/google/glog.git
-        - cd glog
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
+        # - echo "Building Google glog Library"
+        # - git clone --depth=1 https://github.com/google/glog.git
+        # - cd glog
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        # - cmake --build build --target all --clean-first
+        # - cmake --build build --target install
+        # - cd ..
 
-        - echo "Building Google crc32c Library"
-        - git clone --depth=1 --recurse-submodules https://github.com/google/crc32c.git
-        - cd crc32c
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
+        # - echo "Building Google crc32c Library"
+        # - git clone --depth=1 --recurse-submodules https://github.com/google/crc32c.git
+        # - cd crc32c
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        # - cmake --build build --target all --clean-first
+        # - cmake --build build --target install
+        # - cd ..
 
         - echo "Building Google StateChart"
         - git clone --depth=1 https://github.com/google/statechart.git
@@ -201,14 +201,14 @@ testing-tools-libraries:
         # - cmake --build build --target install
         # - cd ..
 
-        - echo "Building Google Capture Thread Library"
-        - git clone --depth=1 --recurse-submodules  https://github.com/google/capture-thread.git
-        - cd capture-thread
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
+        # - echo "Building Google Capture Thread Library"
+        # - git clone --depth=1 --recurse-submodules  https://github.com/google/capture-thread.git
+        # - cd capture-thread
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        # - cmake --build build --target all --clean-first
+        # - cmake --build build --target install
+        # - cd ..
 
         - echo "Building American fuzzy lop"
         - curl -L -O -k http://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz
