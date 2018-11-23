@@ -145,6 +145,8 @@ testing-tools-libraries:
 
     before_script:
         - date -u
+        - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
+        - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
         - export CMAKE_PREFIX_PATH=${DEPS_INSTALL_DIR}:$CMAKE_PREFIX_PATH
     script:
         # - echo "Building Google Test"
@@ -210,23 +212,23 @@ testing-tools-libraries:
         # - cmake --build build --target install
         # - cd ..
 
-        - echo "Building American fuzzy lop"
-        - curl -L -O -k http://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz
+        # - echo "Building American fuzzy lop"
+        # - curl -L -O -k http://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz
         ## - tar zxvf afl-latest.tgz --one-top-level=american-fuzzy-lop
-        - tar -xvzf afl-latest.tgz
-        - cd afl-2.52b
-        - make clean && make && make  DESTDIR=${DEPS_INSTALL_DIR} BINDIR=${DEPS_INSTALL_DIR}/bin DATAROOTDIR=${DEPS_INSTALL_DIR}/share LIBDIR=${DEPS_INSTALL_DIR}/lib install
-        - cd ..
+        # - tar -xvzf afl-latest.tgz
+        # - cd afl-2.52b
+        # - make clean && make && make  DESTDIR=${DEPS_INSTALL_DIR} BINDIR=${DEPS_INSTALL_DIR}/bin DATAROOTDIR=${DEPS_INSTALL_DIR}/share LIBDIR=${DEPS_INSTALL_DIR}/lib install
+        # - cd ..
 
-        - echo "Building A unit testing framework for C"
-        - git clone --depth=1 https://github.com/libcheck/check.git
-        - cd check
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
-        - cmake --build build --target all --clean-first
-        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
-        - cmake --build build --target install || true
-        - cd ..
+        # - echo "Building A unit testing framework for C"
+        # - git clone --depth=1 https://github.com/libcheck/check.git
+        # - cd check
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        # - cmake --build build --target all --clean-first
+        # - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
+        # - cmake --build build --target install || true
+        # - cd ..
 
         - echo "Building The Linux perf GUI for performance analysis."
         - git clone --depth=1 --recurse-submodules https://github.com/KDAB/hotspot.git
