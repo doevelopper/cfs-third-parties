@@ -451,12 +451,12 @@ OpenDDS:
         OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --safety-profile --features=versioned_namespace=1 --security
         COMPILER: g++-8
 
-    dependencies:
-        - testing-tools-libraries
-        - boost
-        - protocol-buffers
-        - xerces
-        - wireshark
+    # dependencies:
+        # - testing-tools-libraries
+        # - boost
+        # - protocol-buffers
+        # - xerces
+        # - wireshark
 
     stage: data-distribution-service
 
