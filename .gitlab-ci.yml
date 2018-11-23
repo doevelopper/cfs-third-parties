@@ -73,7 +73,7 @@ before_script:
 after_script:
     - date
 
-uncrustify:
+.uncrustify:
     <<: *agent-47
     <<: *variables
     stage: sw-quality-tools
@@ -95,7 +95,7 @@ uncrustify:
         - date -u
 
 
-cppcheck:
+.cppcheck:
     <<: *agent-47
     <<: *variables
     stage: sw-quality-tools
@@ -117,7 +117,7 @@ cppcheck:
     after_script:
         - date -u
 
-doxygen:
+.doxygen:
     <<: *agent-47
     <<: *variables
     stage: sw-quality-tools
@@ -275,6 +275,7 @@ time-zone-libraries:
     script:
         - echo "Building translating between absolute and civil times"
         - git clone https://github.com/google/cctz.git
+        - cd cctz
         - cmake -E make_directory mybuild
         - cmake -E chdir mybuild cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} ..
         - cmake --build mybuild --target all  --config Release
