@@ -420,6 +420,34 @@ testing-tools-libraries:
 .OpenDDS:
     <<: *agent-47
     <<: *variables
+    variables:
+        DEPS_INSTALL_DIR: /home/gitlab-runner/third-party-software-component
+        FUZZ: "true" 
+        STATIC: "true"
+        XERCES3: "true"
+        NO_TESTS: "true"
+        NO_INLINE: "true"
+        NO_BUILT_IN_TOPICS: "true"
+        NO_INLINE: "true"
+        VERSIONED_NS: "true"
+        DDS_SECURITY: "true"
+        NO_DEBUG: "true"
+        NO_TESTS: "true"
+        SAFETY_PROFILE: "true"
+        NO_INLINE: "true"
+        USES_WCHAR: "true"
+        NO_INLINE: "true"
+        NO_MULTITOPIC: "true"
+        XERCES3: "true"
+        ACE_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/ACE
+        TAO_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/TAO
+        MPC_ROOT: ${CI_PROJECT_DIR}/MPC
+        DDS_ROOT: ${CI_PROJECT_DIR}
+        LD_LIBRARY_PATH: $ACE_ROOT/lib:$LD_LIBRARY_PATH
+        OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --rapidjson --glib --boost=${DEPS_INSTALL_DIR}
+        OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --safety-profile --features=versioned_namespace=1 --security
+        COMPILER: g++-8
+
     dependencies:
         - testing-tools-libraries
         - boost
@@ -427,18 +455,17 @@ testing-tools-libraries:
         - xerces
         - wireshark
 
-    variables:
-        ACE_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/ACE
-        TAO_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/TAO
-        MPC_ROOT: ${CI_PROJECT_DIR}/MPC
-        LD_LIBRARY_PATH: $ACE_ROOT/lib:$LD_LIBRARY_PATH
-        COMPILER: g++-8
     stage: data-distribution-service
 
     before_script:
         - date -u
         - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
         - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
+        - export CFLAGS="-I${DEPS_INSTALL_DIR}/include:${CFLAGS}"
+        - export CPPFLAGS="-I${DEPS_INSTALL_DIR}/include:${CPPFLAGS}"
+        - export LDFLAGS="-L${DEPS_INSTALL_DIR}/lib/:${LDFLAGS}"
+        - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${DEPS_INSTALL_DIR}/lib"
+        - export PATH="${PATH}:${DEPS_INSTALL_DIR}/include:${DEPS_INSTALL_DIR}/lib"
 
     script:
         - echo "Cloning MPC for DDS"
@@ -464,14 +491,25 @@ testing-tools-libraries:
 
         - echo "Cloning OpenDDS"
         - git clone --depth=1 --recurse-submodules  https://github.com/objectcomputing/OpenDDS.git
-
         - echo "Building OpenDDS"
         - cd OpenDDS
         - ./configure --help
-        - ./configure -std=c++11 --ipv6 --openssl --xerces3 --rapidjson --glib --boost
-            --no-tests --ace=$ACE_ROOT --tao=$TAO_ROOT --mpc=$MPC_ROOT
+        - echo "Build Options $OPENDDS_BUILD_OPTIONS"
+        - echo "Build Config Options $OPENDDS_BUILD_CONFIG_OPTIONS"
+        - echo "CPPFLAGS $CPPFLAGS"
+        - echo "LDFLAGS $LDFLAGS"
+        - echo "ACE_ROOT $ACE_ROOT"
+        - echo "TAO_ROOT $TAO_ROOT"
+        - echo "MPC_ROOT $MPC_ROOT"
+        - echo "prefix ${DEPS_INSTALL_DIR}/opendds"
+        - ./configure $OPENDDS_BUILD_OPTIONS  $OPENDDS_BUILD_CONFIG_OPTIONS
+            --mpcopts="-workers 2" --ace=$ACE_ROOT --tao=$TAO_ROOT --mpc=$MPC_ROOT
             --prefix=${DEPS_INSTALL_DIR}/opendds
 
+#        - |
+#          if [ "$SAFETY_PROFILE" == "1" ]; then
+#              export LD_LIBRARY_PATH+=:${CI_PROJECT_DIR}/build/target/ACE_TAO/ACE/lib:${CI_PROJECT_DIR}/build/target/lib;
+#          fi
         - make clean && make && make install
         - cd ..
 
