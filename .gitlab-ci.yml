@@ -145,7 +145,7 @@ testing-tools-libraries:
 
     before_script:
         - date -u
-#        - sudo apt-get install libelf-dev
+#        - sudo apt-get install libelf-dev  elfutils libelf1
         - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
         - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
         - export CMAKE_PREFIX_PATH=${DEPS_INSTALL_DIR}:$CMAKE_PREFIX_PATH
