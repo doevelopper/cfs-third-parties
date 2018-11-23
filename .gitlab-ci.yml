@@ -215,7 +215,7 @@ testing-tools-libraries:
         ## - tar zxvf afl-latest.tgz --one-top-level=american-fuzzy-lop
         - tar -xvzf afl-latest.tgz
         - cd afl-2.52b
-        - make clean && make && make BINDIR=${DEPS_INSTALL_DIR}/bin DATAROOTDIR=${DEPS_INSTALL_DIR}/share LIBDIR=${DEPS_INSTALL_DIR}/lib install
+        - make clean && make && make  DESTDIR=${DEPS_INSTALL_DIR} BINDIR=${DEPS_INSTALL_DIR}/bin DATAROOTDIR=${DEPS_INSTALL_DIR}/share LIBDIR=${DEPS_INSTALL_DIR}/lib install
         - cd ..
 
         - echo "Building A unit testing framework for C"
