@@ -241,15 +241,15 @@ testing-tools-libraries:
         # - cmake --build build --target install
         # - cd ..
 
-        - echo "Building The Linux perf GUI for performance analysis."
-        - git clone --depth=1 --recurse-submodules https://github.com/apitrace/apitrace.git
-        - cd apitrace
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
-        - cmake --build build --target all --clean-first
-        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
-        - cmake --build build --target install
-        - cd ..
+        # - echo "Building The Linux perf GUI for performance analysis."
+        # - git clone --depth=1 --recurse-submodules https://github.com/apitrace/apitrace.git
+        # - cd apitrace
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        # - cmake --build build --target all --clean-first
+        # - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
+        # - cmake --build build --target install
+        # - cd ..
 
         - echo "Building IEEE doubles binary-decimal and decimal-binary ."
         - git clone --depth=1 https://github.com/google/double-conversion.git 
@@ -257,7 +257,7 @@ testing-tools-libraries:
         - cmake -E make_directory build
         - cmake -E chdir build cmake .. -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
         - cmake --build build --target all --clean-first
-        - test/cctest/cctest --list | tr -d '<' | xargs test/cctest/cctest
+#        - test/cctest/cctest --list | tr -d '<' | xargs test/cctest/cctest
         - cmake --build build --target install
         - cd ..
 
