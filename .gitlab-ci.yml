@@ -73,7 +73,7 @@ before_script:
 after_script:
     - date
 
-.uncrustify:
+uncrustify:
     <<: *agent-47
     <<: *variables
     stage: sw-quality-tools
@@ -95,7 +95,7 @@ after_script:
         - date -u
 
 
-.cppcheck:
+cppcheck:
     <<: *agent-47
     <<: *variables
     stage: sw-quality-tools
@@ -117,7 +117,7 @@ after_script:
     after_script:
         - date -u
 
-.doxygen:
+doxygen:
     <<: *agent-47
     <<: *variables
     stage: sw-quality-tools
@@ -189,10 +189,8 @@ after_script:
         - echo "Building Google StateChart"
         - git clone --depth=1 https://github.com/google/statechart.git
         - cd statechart
-        - cmake -E make_directory build
-#        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-#        - cmake --build build --target all --clean-first
-#        - cmake --build build --target install
+        - bazel build //statechart/...
+        - bazel test //statechart/...
         - cd ..
 
         # - echo "Building Google Abseil CPP Library"
@@ -255,7 +253,7 @@ after_script:
         - git clone --depth=1 https://github.com/google/double-conversion.git 
         - cd double-conversion
         - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        - cmake -E chdir build cmake .. -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
         - cmake --build build --target all --clean-first
 #        - test/cctest/cctest --list | tr -d '<' | xargs test/cctest/cctest
         - cmake --build build --target install
@@ -264,7 +262,28 @@ after_script:
     after_script:
         - date -u
 
-.logging utils:
+time-zone-libraries:
+    <<: *agent-47
+    <<: *variables
+    variables:
+        DEPS_INSTALL_DIR: /home/gitlab-runner/third-party-software-component
+
+    stage: dependencies
+
+    before_script:
+        - date -u
+    script:
+        - echo "Building translating between absolute and civil times"
+        - git clone https://github.com/google/cctz.git
+        - cmake -E make_directory mybuild
+        - cmake -E chdir mybuild cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} ..
+        - cmake --build mybuild --target all  --config Release
+        - ctest
+        - cmake --build mybuild --config Release --target install
+        - cmake --build mybuild --target install
+        - cd ..
+
+logging utils:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -313,7 +332,7 @@ after_script:
     after_script:
         - date -u
 
-.protocol-buffers:
+protocol-buffers:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -334,7 +353,7 @@ after_script:
     after_script:
         - date -u
 
-.boost:
+boost:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -355,7 +374,7 @@ after_script:
     after_script:
         - date -u
 
-.xerces:
+xerces:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -377,7 +396,7 @@ after_script:
     after_script:
         - date -u
 
-.wireshark:
+wireshark:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -399,7 +418,7 @@ after_script:
     after_script:
         - date -u
 
-.eprosima-dds:
+eprosima-dds:
     <<: *agent-47
     <<: *variables
     stage: data-distribution-service
@@ -504,7 +523,7 @@ OpenDDS:
         - echo "ACE_ROOT $ACE_ROOT"
         - echo "TAO_ROOT $TAO_ROOT"
         - echo "MPC_ROOT $MPC_ROOT"
-        - echo "prefix ${DEPS_INSTALL_DIR}/opendds"
+        - echo "prefix ${DEPS_INSTALL_DIR}"
         - ./configure $OPENDDS_BUILD_OPTIONS  $OPENDDS_BUILD_CONFIG_OPTIONS
             --mpcopts="-workers 2" --ace=$ACE_ROOT --tao=$TAO_ROOT --mpc=$MPC_ROOT
             --prefix=${DEPS_INSTALL_DIR}/opendds
