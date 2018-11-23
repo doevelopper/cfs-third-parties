@@ -375,7 +375,7 @@ boost:
     after_script:
         - date -u
 
-xerces:
+.xerces:
     <<: *agent-47
     <<: *variables
     stage: dependencies
