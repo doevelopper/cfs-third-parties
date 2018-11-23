@@ -231,15 +231,15 @@ testing-tools-libraries:
         # - cmake --build build --target install || true
         # - cd ..
 
-        - echo "Building The Linux perf GUI for performance analysis."
-        - git clone --depth=1 --recurse-submodules https://github.com/KDAB/hotspot.git
-        - cd hotspot
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
-        - cmake --build build --target all --clean-first
-        - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
-        - cmake --build build --target install
-        - cd ..
+        # - echo "Building The Linux perf GUI for performance analysis."
+        # - git clone --depth=1 --recurse-submodules https://github.com/KDAB/hotspot.git
+        # - cd hotspot
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        # - cmake --build build --target all --clean-first
+        # - CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
+        # - cmake --build build --target install
+        # - cd ..
 
         - echo "Building The Linux perf GUI for performance analysis."
         - git clone --depth=1 --recurse-submodules https://github.com/apitrace/apitrace.git
