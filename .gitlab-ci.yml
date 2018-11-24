@@ -69,6 +69,16 @@ before_script:
     - make --version
     - date
     - hostname
+    - export LC_CTYPE=en_US.UTF-8
+    - export LC_ALL=en_US.UTF-8
+    - export LANG=en_US.UTF-8
+#    #!/bin/bash -e
+#    RELEASE=0.5.1
+#    wget https://github.com/bazelbuild/bazel/releases/download/${RELEASE}/bazel-${RELEASE}-installer-linux-x86_64.sh
+#    wget https://github.com/bazelbuild/bazel/releases/download/${RELEASE}/bazel-${RELEASE}-installer-linux-x86_64.sh.sha256
+#    sha256sum -c bazel-${RELEASE}-installer-linux-x86_64.sh.sha256
+#    chmod +x bazel-${RELEASE}-installer-linux-x86_64.sh
+#    ./bazel-${RELEASE}-installer-linux-x86_64.sh --user
 
 after_script:
     - date
@@ -467,8 +477,8 @@ OpenDDS:
         MPC_ROOT: ${CI_PROJECT_DIR}/MPC
         DDS_ROOT: ${CI_PROJECT_DIR}
         LD_LIBRARY_PATH: $ACE_ROOT/lib:$LD_LIBRARY_PATH
-        OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --rapidjson --glib --boost=${DEPS_INSTALL_DIR}
-        OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --safety-profile --features=versioned_namespace=1 --security --java  --no-debug --optimize
+        OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --qt --java --rapidjson --glib --boost=${DEPS_INSTALL_DIR}
+        OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --safety-profile --features=versioned_namespace=1 --security --no-debug --optimize
         COMPILER: g++-8
 
     # dependencies:
