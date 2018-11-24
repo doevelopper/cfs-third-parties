@@ -397,7 +397,7 @@ after_script:
     after_script:
         - date -u
 
-wireshark:
+.wireshark:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -419,7 +419,7 @@ wireshark:
     after_script:
         - date -u
 
-eprosima-dds:
+.eprosima-dds:
     <<: *agent-47
     <<: *variables
     stage: data-distribution-service
@@ -490,7 +490,7 @@ OpenDDS:
         - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${DEPS_INSTALL_DIR}/lib"
         - export PATH="${PATH}:${DEPS_INSTALL_DIR}/include:${DEPS_INSTALL_DIR}/lib"
         - export JAVA_HOME=/opt/jdk-11.0.1/
-        - export PATH=/opt/apache-maven-3.6.0/bin:$PATH
+        - export PATH=/opt/apache-maven-3.6.0/bin:/opt/jdk-11.0.1/bin:$PATH
 
     script:
         - echo "Cloning MPC for DDS"
