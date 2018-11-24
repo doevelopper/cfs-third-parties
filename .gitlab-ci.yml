@@ -478,7 +478,8 @@ OpenDDS:
         DDS_ROOT: ${CI_PROJECT_DIR}
         LD_LIBRARY_PATH: $ACE_ROOT/lib:$LD_LIBRARY_PATH
         OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --qt --java --rapidjson --glib --boost=${DEPS_INSTALL_DIR}
-        OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --safety-profile --features=versioned_namespace=1 --security --no-debug --optimize
+        OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --features=versioned_namespace=1 --security --no-debug --optimize 
+#--safety-profile 
         COMPILER: g++-8
 
     # dependencies:
