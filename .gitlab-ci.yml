@@ -450,7 +450,7 @@ after_script:
     after_script:
         - date -u
 
-OpenDDS:
+.OpenDDS:
     <<: *agent-47
     <<: *variables
     variables:
@@ -557,7 +557,7 @@ OpenDDS:
     after_script:
         - date -u
 
-.vortex-opensplice-dds:
+vortex-opensplice-dds:
     <<: *agent-47
     <<: *variables
     stage: data-distribution-service
@@ -579,7 +579,8 @@ OpenDDS:
         - cd opensplice
         - ./configure x86_64.linux-release
         - source envs-x86_64.linux-release.sh
-        - make && make install
+        - make -j4 
+        - make install
         - cd ..
 
     after_script:
