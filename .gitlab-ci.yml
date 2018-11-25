@@ -477,8 +477,8 @@ OpenDDS:
         MPC_ROOT: ${CI_PROJECT_DIR}/MPC
         DDS_ROOT: ${CI_PROJECT_DIR}
         LD_LIBRARY_PATH: $ACE_ROOT/lib:$LD_LIBRARY_PATH
-        OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --java --rapidjson --glib --boost=${DEPS_INSTALL_DIR}
-        OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --features=versioned_namespace=1 --no-debug --optimize
+        OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --java --rapidjson --wireshark --glib --boost=${DEPS_INSTALL_DIR}
+        OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --features=versioned_namespace=1 --macros=c++11=1 --no-debug --optimize
 #--security --safety-profile  --qt 
         COMPILER: g++-8
 
@@ -543,12 +543,13 @@ OpenDDS:
             --prefix=${DEPS_INSTALL_DIR}/opendds
 
         - tools/scripts/show_build_config.pl
-        - |
-          if [ "$SAFETY_PROFILE" == "TRUE" ]; then
-              export LD_LIBRARY_PATH+=:${DDS_ROOT}/OpenDDS/build/target/ACE_TAO/ACE/lib:${ACE_ROOT}/lib:${DDS_ROOT}/OpenDDS/build/target/lib:${DDS_ROOT}/OpenDDS/lib;
-          fi
+#        - if [ "$SAFETY_PROFILE" == "TRUE" ]; then
+#              export LD_LIBRARY_PATH+=:${DDS_ROOT}/OpenDDS/build/target/ACE_TAO/ACE/lib:${ACE_ROOT}/lib:${DDS_ROOT}/OpenDDS/build/target/lib:${DDS_ROOT}/OpenDDS/lib;
+#          fi
+        - export LD_LIBRARY_PATH+=:${DDS_ROOT}/OpenDDS/build/target/ACE_TAO/ACE/lib:${ACE_ROOT}/lib:${DDS_ROOT}/OpenDDS/build/target/lib:${DDS_ROOT}/OpenDDS/lib;
 #        - make clean && make -s -j 6 && make -j 6 install 
-        - make -s -j 6 && make -j 6 install 
+        - make -j 4
+        - make -j 4 install
         - cd ..
 
     after_script:
