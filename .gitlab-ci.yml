@@ -561,8 +561,8 @@ vortex-opensplice-dds:
     <<: *agent-47
     <<: *variables
     stage: data-distribution-service
-    dependencies:
-        - protocol-buffers
+#    dependencies:
+#        - protocol-buffers
 
     before_script:
         - date -u
