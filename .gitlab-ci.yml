@@ -477,7 +477,7 @@ OpenDDS:
         MPC_ROOT: ${CI_PROJECT_DIR}/MPC
         DDS_ROOT: ${CI_PROJECT_DIR}
         LD_LIBRARY_PATH: $ACE_ROOT/lib:$LD_LIBRARY_PATH
-        OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --java --rapidjson --wireshark=${DEPS_INSTALL_DIR} --glib --boost=${DEPS_INSTALL_DIR}
+        OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --java --rapidjson --wireshark=${DEPS_INSTALL_DIR}/include/wireshark/ --glib --boost=${DEPS_INSTALL_DIR}
         OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --features=versioned_namespace=1 --macros=c++11=1 --no-debug --optimize
 #--security --safety-profile  --qt 
         COMPILER: g++-8
