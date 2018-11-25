@@ -570,7 +570,7 @@ vortex-opensplice-dds:
         # - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
         # - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
 #        - export PROTOBUF_HOME=`pwd`
-        - export  PROTOBUF_HOME=${DEPS_INSTALL_DIR}
+        - export  PROTOBUF_HOME=${DEPS_INSTALL_DIR}/include/google/
 
     script:
         - git clone --depth=1 https://github.com/ADLINK-IST/opensplice.git
@@ -579,7 +579,7 @@ vortex-opensplice-dds:
         - cd opensplice
         - ./configure x86_64.linux-release
         - source envs-x86_64.linux-release.sh
-        - make -j4 
+        - make
         - make install
         - cd ..
 
