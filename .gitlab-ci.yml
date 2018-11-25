@@ -500,8 +500,10 @@ OpenDDS:
         - export LDFLAGS="-L${DEPS_INSTALL_DIR}/lib/:${LDFLAGS}"
         - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${DEPS_INSTALL_DIR}/lib"
         - export PATH="${PATH}:${DEPS_INSTALL_DIR}/include:${DEPS_INSTALL_DIR}/lib"
-        - export JAVA_HOME=/opt/jdk-11.0.1/
-        - export PATH=/opt/apache-maven-3.6.0/bin:/opt/jdk-11.0.1/bin:$PATH
+#        - export JAVA_HOME=/opt/jdk-11.0.1/
+#        - export PATH=/opt/apache-maven-3.6.0/bin:/opt/jdk-11.0.1/bin:$PATH
+        - export JAVA_HOME=/opt/jdk1.8.0_192/
+        - export PATH=/opt/apache-maven-3.6.0/bin:/opt/jdk1.8.0_192/bin:$PATH
 
     script:
         - echo "Cloning MPC for DDS"
