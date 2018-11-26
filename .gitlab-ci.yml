@@ -570,17 +570,22 @@ vortex-opensplice-dds:
         # - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
         # - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
 #        - export PROTOBUF_HOME=`pwd`
-        - export  PROTOBUF_HOME=${DEPS_INSTALL_DIR}/include/google/
+#        - export  PROTOBUF_HOME=${DEPS_INSTALL_DIR}/include/google/
 
     script:
-        - git clone --depth=1 https://github.com/ADLINK-IST/opensplice.git
-        - mkdir -pv submods/MPC_ROOT
-        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/MPC.git
+        - git clone --depth=1 --recurse-submodules  https://github.com/ADLINK-IST/opensplice.git
+#        - mkdir -pv submods/MPC_ROOT
+#        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/MPC.git
         - cd opensplice
-        - ./configure x86_64.linux-release
+        - ./configure x86_64.linux-release --prefix=${DEPS_INSTALL_DIR}/vortexDDS
         - source envs-x86_64.linux-release.sh
-        - make
-        - make install
+        - make help || true
+        - make -j4
+#        - make install
+        - make -pv ${DEPS_INSTALL_DIR}/vortexDDS
+        - cp -Rv install/HDE ${DEPS_INSTALL_DIR}/vortexDDS/
+        - cp -Rv install/RTS ${DEPS_INSTALL_DIR}/vortexDDS/
+        - cp -Rv install/VS ${DEPS_INSTALL_DIR}/vortexDDS/
         - cd ..
 
     after_script:
