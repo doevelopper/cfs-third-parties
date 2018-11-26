@@ -17,6 +17,7 @@ stages:
 #    retry: 1
     tags:
         - agent-smith
+        - dds
 
 .only_stable: &only_stable
     only:
@@ -47,7 +48,7 @@ stages:
     # DEPS_INSTALL_DIR: /opt/devslibs
     # DEPS_INSTALL_DIR: ${CI_PROJECT_DIR}/devslibs
     # DEPS_INSTALL_DIR: ${HOME}/devslibs
-        DEPS_INSTALL_DIR: /home/gitlab-runner/third-party-software-component
+        DEPS_INSTALL_DIR: /home/gitlab-runner/third-party-software-component-{CI_COMMIT_REF_NAME}
 
 .push-cache: &push-cache
     cache:
@@ -69,11 +70,21 @@ before_script:
     - make --version
     - date
     - hostname
+    - export LC_CTYPE=en_US.UTF-8
+    - export LC_ALL=en_US.UTF-8
+    - export LANG=en_US.UTF-8
+#    #!/bin/bash -e
+#    RELEASE=0.5.1
+#    wget https://github.com/bazelbuild/bazel/releases/download/${RELEASE}/bazel-${RELEASE}-installer-linux-x86_64.sh
+#    wget https://github.com/bazelbuild/bazel/releases/download/${RELEASE}/bazel-${RELEASE}-installer-linux-x86_64.sh.sha256
+#    sha256sum -c bazel-${RELEASE}-installer-linux-x86_64.sh.sha256
+#    chmod +x bazel-${RELEASE}-installer-linux-x86_64.sh
+#    ./bazel-${RELEASE}-installer-linux-x86_64.sh --user
 
 after_script:
     - date
 
-.uncrustify:
+uncrustify:
     <<: *agent-47
     <<: *variables
     stage: sw-quality-tools
@@ -95,7 +106,7 @@ after_script:
         - date -u
 
 
-.cppcheck:
+cppcheck:
     <<: *agent-47
     <<: *variables
     stage: sw-quality-tools
@@ -117,7 +128,7 @@ after_script:
     after_script:
         - date -u
 
-.doxygen:
+doxygen:
     <<: *agent-47
     <<: *variables
     stage: sw-quality-tools
@@ -138,7 +149,7 @@ after_script:
     after_script:
         - date -u
 
-.testing-tools-libraries:
+testing-tools-libraries:
     <<: *agent-47
     <<: *variables
     stage: dev-utils
@@ -189,10 +200,8 @@ after_script:
         - echo "Building Google StateChart"
         - git clone --depth=1 https://github.com/google/statechart.git
         - cd statechart
-        - cmake -E make_directory build
-#        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
-#        - cmake --build build --target all --clean-first
-#        - cmake --build build --target install
+        - bazel build //statechart/...
+        - bazel test //statechart/...
         - cd ..
 
         # - echo "Building Google Abseil CPP Library"
@@ -255,16 +264,47 @@ after_script:
         - git clone --depth=1 https://github.com/google/double-conversion.git 
         - cd double-conversion
         - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        - cmake -E chdir build cmake .. -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
         - cmake --build build --target all --clean-first
 #        - test/cctest/cctest --list | tr -d '<' | xargs test/cctest/cctest
-        - cmake --build build --target install
+        - cmake --build build --target install || true
+        - cd ..
+
+        - echo "Building unit-tests, TDD and BDD ."
+        - git clone --depth=1 https://github.com/catchorg/Catch2.git
+        - cd Catch2
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake .. -DUSE_CPP14=1 -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install || true
         - cd ..
 
     after_script:
         - date -u
 
-.logging utils:
+.time-zone-libraries:
+    <<: *agent-47
+    <<: *variables
+    variables:
+        DEPS_INSTALL_DIR: /home/gitlab-runner/third-party-software-component
+
+    stage: dependencies
+
+    before_script:
+        - date -u
+    script:
+        - echo "Building translating between absolute and civil times"
+        - git clone https://github.com/google/cctz.git
+        - cd cctz
+        - cmake -E make_directory mybuild
+        - cmake -E chdir mybuild cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} ..
+        - cmake --build mybuild --target all  --config Release
+        - ctest
+        - cmake --build mybuild --config Release --target install
+        - cmake --build mybuild --target install
+        - cd ..
+
+logging utils:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -313,7 +353,7 @@ after_script:
     after_script:
         - date -u
 
-.protocol-buffers:
+protocol-buffers:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -334,7 +374,7 @@ after_script:
     after_script:
         - date -u
 
-.boost:
+boost:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -355,7 +395,7 @@ after_script:
     after_script:
         - date -u
 
-.xerces:
+xerces:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -377,7 +417,7 @@ after_script:
     after_script:
         - date -u
 
-.wireshark:
+wireshark:
     <<: *agent-47
     <<: *variables
     stage: dependencies
@@ -387,7 +427,7 @@ after_script:
         - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
     script:
         - echo "Building Wireshark for DDs Dissectors"
-#        - sudo apt-get install libpulse-dev
+#        - sudo apt-get install libpulse-dev libssl-dev
         - GIT_SSL_NO_VERIFY=1 git clone --depth=1 --recurse-submodules https://github.com/wireshark/wireshark.git
         - cd wireshark
         - cmake -E make_directory build
@@ -399,7 +439,7 @@ after_script:
     after_script:
         - date -u
 
-.eprosima-dds:
+eprosima-dds:
     <<: *agent-47
     <<: *variables
     stage: data-distribution-service
@@ -420,43 +460,44 @@ after_script:
     after_script:
         - date -u
 
-.OpenDDS:
+OpenDDS:
     <<: *agent-47
     <<: *variables
     variables:
         DEPS_INSTALL_DIR: /home/gitlab-runner/third-party-software-component
-        FUZZ: "true" 
-        STATIC: "true"
-        XERCES3: "true"
-        NO_TESTS: "true"
+        FUZZ: "TRUE" 
+        STATIC: "TRUE"
+        XERCES3: "TRUE"
+        NO_TESTS: "TRUE"
+        NO_INLINE: "TRUE"
+        NO_BUILT_IN_TOPICS: "TRUE"
         NO_INLINE: "true"
-        NO_BUILT_IN_TOPICS: "true"
-        NO_INLINE: "true"
-        VERSIONED_NS: "true"
-        DDS_SECURITY: "true"
-        NO_DEBUG: "true"
-        NO_TESTS: "true"
-        SAFETY_PROFILE: "true"
-        NO_INLINE: "true"
-        USES_WCHAR: "true"
-        NO_INLINE: "true"
-        NO_MULTITOPIC: "true"
-        XERCES3: "true"
+        VERSIONED_NS: "TRUE"
+        DDS_SECURITY: "TRUE"
+        NO_DEBUG: "TRUE"
+        NO_TESTS: "TRUE"
+        SAFETY_PROFILE: "TRUE"
+        NO_INLINE: "TRUE"
+        USES_WCHAR: "TRUE"
+        NO_INLINE: "TRUE"
+        NO_MULTITOPIC: "TRUE"
+        XERCES3: "TRUE"
         ACE_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/ACE
         TAO_ROOT: ${CI_PROJECT_DIR}/ACE_TAO/TAO
         MPC_ROOT: ${CI_PROJECT_DIR}/MPC
         DDS_ROOT: ${CI_PROJECT_DIR}
         LD_LIBRARY_PATH: $ACE_ROOT/lib:$LD_LIBRARY_PATH
-        OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --rapidjson --glib --boost=${DEPS_INSTALL_DIR}
-        OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --safety-profile --features=versioned_namespace=1 --security
+        OPENDDS_BUILD_OPTIONS: -std=c++11 --ipv6 --openssl --xerces3=${DEPS_INSTALL_DIR} --java --rapidjson --glib --boost=${DEPS_INSTALL_DIR}
+        OPENDDS_BUILD_CONFIG_OPTIONS: --no-tests --no-inline --features=versioned_namespace=1 --macros=c++11=1 --no-debug --optimize
+#--security --safety-profile  --qt   --wireshark=${DEPS_INSTALL_DIR}/include/wireshark/ 
         COMPILER: g++-8
 
-    dependencies:
-        - testing-tools-libraries
-        - boost
-        - protocol-buffers
-        - xerces
-        - wireshark
+    # dependencies:
+        # - testing-tools-libraries
+        # - boost
+        # - protocol-buffers
+        # - xerces
+        # - wireshark
 
     stage: data-distribution-service
 
@@ -469,6 +510,10 @@ after_script:
         - export LDFLAGS="-L${DEPS_INSTALL_DIR}/lib/:${LDFLAGS}"
         - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${DEPS_INSTALL_DIR}/lib"
         - export PATH="${PATH}:${DEPS_INSTALL_DIR}/include:${DEPS_INSTALL_DIR}/lib"
+#        - export JAVA_HOME=/opt/jdk-11.0.1/
+#        - export PATH=/opt/apache-maven-3.6.0/bin:/opt/jdk-11.0.1/bin:$PATH
+        - export JAVA_HOME=/opt/jdk1.8.0_192/
+        - export PATH=/opt/apache-maven-3.6.0/bin:/opt/jdk1.8.0_192/bin:$PATH
 
     script:
         - echo "Cloning MPC for DDS"
@@ -483,14 +528,14 @@ after_script:
         - echo "Cloning DANCE for DDS"
         - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/DAnCE.git
 
-        - echo "Cloning mFAST encoding/decoding library"
-        - git clone --depth=1 --recursive https://github.com/objectcomputing/mFAST.git
-        - cd mFAST
-        - cmake -E make_directory build
-        - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
-        - cmake --build build --target all --clean-first
-        - cmake --build build --target install
-        - cd ..
+        # - echo "Cloning mFAST encoding/decoding library"
+        # - git clone --depth=1 --recursive https://github.com/objectcomputing/mFAST.git
+        # - cd mFAST
+        # - cmake -E make_directory build
+        # - cmake -E chdir build cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} 
+        # - cmake --build build --target all --clean-first
+        # - cmake --build build --target install
+        # - cd ..
 
         - echo "Cloning OpenDDS"
         - git clone --depth=1 --recurse-submodules  https://github.com/objectcomputing/OpenDDS.git
@@ -504,16 +549,19 @@ after_script:
         - echo "ACE_ROOT $ACE_ROOT"
         - echo "TAO_ROOT $TAO_ROOT"
         - echo "MPC_ROOT $MPC_ROOT"
-        - echo "prefix ${DEPS_INSTALL_DIR}/opendds"
+        - echo "prefix ${DEPS_INSTALL_DIR}"
         - ./configure $OPENDDS_BUILD_OPTIONS  $OPENDDS_BUILD_CONFIG_OPTIONS
             --mpcopts="-workers 2" --ace=$ACE_ROOT --tao=$TAO_ROOT --mpc=$MPC_ROOT
             --prefix=${DEPS_INSTALL_DIR}/opendds
 
-#        - |
-#          if [ "$SAFETY_PROFILE" == "1" ]; then
-#              export LD_LIBRARY_PATH+=:${CI_PROJECT_DIR}/build/target/ACE_TAO/ACE/lib:${CI_PROJECT_DIR}/build/target/lib;
+        - tools/scripts/show_build_config.pl
+#        - if [ "$SAFETY_PROFILE" == "TRUE" ]; then
+#              export LD_LIBRARY_PATH+=:${DDS_ROOT}/OpenDDS/build/target/ACE_TAO/ACE/lib:${ACE_ROOT}/lib:${DDS_ROOT}/OpenDDS/build/target/lib:${DDS_ROOT}/OpenDDS/lib;
 #          fi
-        - make clean && make && make install
+        - export LD_LIBRARY_PATH+=:${DDS_ROOT}/OpenDDS/build/target/ACE_TAO/ACE/lib:${ACE_ROOT}/lib:${DDS_ROOT}/OpenDDS/build/target/lib:${DDS_ROOT}/OpenDDS/lib;
+#        - make clean && make -s -j 6 && make -j 6 install 
+        - make -j 4
+        - make -j 4 install
         - cd ..
 
     after_script:
@@ -523,8 +571,8 @@ after_script:
     <<: *agent-47
     <<: *variables
     stage: data-distribution-service
-    dependencies:
-        - protocol-buffers
+#    dependencies:
+#        - protocol-buffers
 
     before_script:
         - date -u
@@ -532,16 +580,18 @@ after_script:
         # - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
         # - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
 #        - export PROTOBUF_HOME=`pwd`
-        - export  PROTOBUF_HOME=${DEPS_INSTALL_DIR}
+#        - export  PROTOBUF_HOME=${DEPS_INSTALL_DIR}/include/google/
 
     script:
-        - git clone --depth=1 https://github.com/ADLINK-IST/opensplice.git
-        - mkdir -pv submods/MPC_ROOT
-        - git clone --depth=1 --recurse-submodules https://github.com/DOCGroup/MPC.git
+        - git clone --depth=1 --recurse-submodules  https://github.com/ADLINK-IST/opensplice.git
         - cd opensplice
-        - ./configure x86_64.linux-release
+        - ./configure x86_64.linux-release --prefix=${DEPS_INSTALL_DIR}/vortexDDS
         - source envs-x86_64.linux-release.sh
-        - make && make install
+        - time make -j4
+        - make -pv ${DEPS_INSTALL_DIR}/vortexDDS
+        - cp -Rv install/HDE ${DEPS_INSTALL_DIR}/vortexDDS/
+        - cp -Rv install/RTS ${DEPS_INSTALL_DIR}/vortexDDS/
+        - cp -Rv install/VS ${DEPS_INSTALL_DIR}/vortexDDS/
         - cd ..
 
     after_script:
