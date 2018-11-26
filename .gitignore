@@ -30,3 +30,162 @@
 *.exe
 *.out
 *.app
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+#Vim swap files
+*.swp
+*.swo
+
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+target/
+AMD64.*/
+build-wrapper-linux-x86-32
+build-wrapper-win-x86-32.exe
+build-wrapper-linux-x86-64
+build-wrapper-win-x86-64.exe
+libinterceptor-*
+build-wrapper-linux-x86/
+build-wrapper-win-x86/
+sonar-scanner-3.0.3.778-linux/
+sonar-scanner-3.0.3.778-windows/
+cpplint.egg-*
+lizard-1.14.7/
+# Add any directories, files, or patterns you don't want to be tracked by version control
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+CMakeLists.txt.user
+
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+
+# User-specific stuff:
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/dictionaries
+
+# Sensitive or high-churn files:
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+
+# Gradle:
+.idea/**/gradle.xml
+.idea/**/libraries
+
+# CMake
+/cmake-build-*/
+cmake-build-debug/
+cmake-build-release/
+
+# Mongo Explorer plugin:
+.idea/**/mongoSettings.xml
+
+## File-based project format:
+*.iws
+
+# Unit test / coverage reports
+.coverage
+nosetests.xml
+
+## Plugin-specific files:
+
+# IntelliJ
+out/
+*.iml
+*.iws
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Cursive Clojure plugin
+.idea/replstate.xml
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+!catch2-v2.2.2/CMakeLists.txt
+!googletest-release-1.8.0/CMakeLists.txt
+!cucumber-cpp-v0.4/CMakeLists.txt
+!benchmark-v1.4.0/CMakeLists.txt
+
+apr-util-1.6.1/
+apr-1.5.2/
+apr-1.6.3/
+apr-iconv-1.2.2/
+expat-2.1.1/
+log4cxx-0.11.0-SNAPSHOT/
+ACE_wrappers/
+benchmark-v1.4.0/
+catch2-v2.2.2/
+googletest-release-1.8.0/
+#libexpat-R_2_2_5/
+OpenDDS-DDS-3.12.2/
+VortexOpenSplice-6.7.180404OSS/
+fast-RTPS/
+cucumber-cpp-v0.4/
+boost_1_66_0/
+docs/
+src/main/resources/guides/coding-style.md
+src/main/resources/guides/extended-coding-style-guide.md
+src/main/resources/scripts/cpplint-python-3.py
+uncrustifyDoc.cfg
+Report.xml
+
+
+src/main/resources/cmakeModule/
+src/main/resources/macros/
+#src/main/cpp/apache-logging-log4cxx/
+#src/main/cpp/apr-2.0/
+#!src/main/cpp/apr-2.0/CMakeLists.txt
+#src/main/cpp/libexpat-R_2_2_5/
+#!src/main/cpp/libexpat-R_2_2_5/expat/CMakeLists.txt
+#
+
+
