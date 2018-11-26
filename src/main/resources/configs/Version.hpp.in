@@ -1,0 +1,320 @@
+#
+#               Copyright (c) 2014-2018 A.H.L
+#
+#        Permission is hereby granted, free of charge, to any person obtaining
+#        a copy of this software and associated documentation files (the
+#        "Software"), to deal in the Software without restriction, including
+#        without limitation the rights to use, copy, modify, merge, publish,
+#        distribute, sublicense, and/or sell copies of the Software, and to
+#        permit persons to whom the Software is furnished to do so, subject to
+#        the following conditions:
+#
+#        The above copyright notice and this permission notice shall be
+#        included in all copies or substantial portions of the Software.
+#
+#        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+#        EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+#        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#        NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+#        LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+#        OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+#        WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+#ifndef @NAMESPACE@_CORE_VERSION_HPP
+#define @NAMESPACE@_CORE_VERSION_HPP
+
+#include <sstream>
+#include <string>
+#include <cppbdd101/GitRevision.hpp>
+
+/*!
+ * @brief ReleaseLevel indicates the release level of this API
+ *          This enum follows the release level convention used by python.
+ * @ref https://docs.python.org/3/c-api/apiabiversion.html
+ * @ref https://docs.python.org/3.7/c-api/apiabiversion.html
+ * @ref https://hg.python.org/cpython/file/3.6/Include/patchlevel.h
+ * @ref https://www.python.org/dev/peps/pep-0440/ 
+ */
+enum ReleaseLevel
+{
+    SNAPSHOOT    = 0xD , /**< API is not tested, work in progress. */
+    ALPHA        = 0xA , /**< API is in alpha state, i.e. work in progress. */
+    BETA         = 0xB , /**< API is in beta state, i.e. close to be finished. */
+    CANDIDATE    = 0xC , /**< API is in release candidate state. */
+    FINAL        = 0xF , /**< API is in final state, i.e. officially approved. */
+};
+
+#define RELEASE_LEVEL   ReleaseLevel::@RELEASE_LEVEL@
+#define RELEASE_SERIAL  0
+
+/*!
+ * @brief Version as a single 4-byte hex number, e.g. 0x010502B2 == 1.5.2b2.
+ *        Use this for numeric comparisons, e.g. #if VERSION_HEX >= ...
+ */
+#define VERSION_HEX (                                                           \
+        (@PROJECT_VERSION_MAJOR@ << 24)     |                                   \
+        (@PROJECT_VERSION_MINOR@ << 16)     |                                   \
+        (@PROJECT_VERSION_PATCH@ <<  8)     |                                   \
+        (RELEASE_LEVEL <<  4)               |                                   \
+        (RELEASE_SERIAL << 0)                                                   \
+        )
+
+#define EQ_VERSION_GT( MAJOR , MINOR , PATCH )                                  \
+    (                                                                           \
+        (@PROJECT_VERSION_MAJOR@ > MAJOR) ||                                    \
+        (@PROJECT_VERSION_MAJOR@ == MAJOR &&                                    \
+         (@PROJECT_VERSION_MINOR@ > MINOR ||                                    \
+          (@PROJECT_VERSION_MINOR@ == MINOR &&                                  \
+           @PROJECT_VERSION_PATCH@ > PATCH)))                                   \
+    )
+
+#define EQ_VERSION_GE( MAJOR , MINOR , PATCH )                                  \
+    (                                                                           \
+        (@PROJECT_VERSION_MAJOR@ > MAJOR) ||                                    \
+        (@PROJECT_VERSION_MAJOR@ == MAJOR &&                                    \
+         (@PROJECT_VERSION_MINOR@ > MINOR ||                                    \
+          (@PROJECT_VERSION_MINOR@ == MINOR &&                                  \
+           @PROJECT_VERSION_PATCH@ >= PATCH)))                                  \
+    )
+
+#define EQ_VERSION_LT( MAJOR , MINOR , PATCH )                                  \
+    (                                                                           \
+        (@PROJECT_VERSION_MAJOR@ < MAJOR) ||                                    \
+        (@PROJECT_VERSION_MAJOR@ == MAJOR &&                                    \
+         (@PROJECT_VERSION_MINOR@ < MINOR ||                                    \
+          (@PROJECT_VERSION_MINOR@ == MINOR &&                                  \
+           @PROJECT_VERSION_PATCH@ < PATCH)))                                   \
+    )
+
+#define EQ_VERSION_LE( MAJOR , MINOR , PATCH )                                  \
+    (                                                                           \
+        (@PROJECT_VERSION_MAJOR@ < MAJOR) ||                                    \
+        (@PROJECT_VERSION_MAJOR@ == MAJOR &&                                    \
+         (@PROJECT_VERSION_MINOR@ < MINOR ||                                    \
+          (@PROJECT_VERSION_MINOR@ == MINOR &&                                  \
+           @PROJECT_VERSION_PATCH@ = PATCH)))                                   \
+    )
+
+/*!
+ * @brief The current major version.
+ */
+#define VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+
+/*!
+ * @brief  The current minor version.
+ */
+#define VERSION_MINOR @PROJECT_VERSION_MINOR@
+
+/*!
+ * @brief  The current patch level.
+ */
+#define VERSION_TWEAK @PROJECT_VERSION_TWEAK@
+
+/*!
+ * @brief  The current micro version.
+ */
+#define VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+/*!
+ * @brief The current SCM revision.
+ */
+#define SHAH_VERSION_REVISION HASH
+
+
+/*!
+ * @brief  True if the current version is newer than the given one.
+ */
+#define VERSION_GT( MAJOR , MINOR , PATCH )                        		\
+    (                                                                           \
+        (VERSION_MAJOR > MAJOR) ||                                    		\
+        (VERSION_MAJOR == MAJOR &&                                    		\
+         (VERSION_MINOR > MINOR ||                                     		\
+          (VERSION_MINOR == MINOR &&                                    	\
+           VERSION_PATCH > PATCH)))                                      	\
+    )
+
+/*!
+ * @brief True if the current version is equal or newer to the given.
+ */
+#define VERSION_GE( MAJOR , MINOR , PATCH )                        		\
+    (                                                                           \
+        (VERSION_MAJOR > MAJOR) ||                                    		\
+        (VERSION_MAJOR == MAJOR &&                                    		\
+         (VERSION_MINOR > MINOR ||                                     		\
+          (VERSION_MINOR == MINOR &&                                    	\
+           VERSION_PATCH >= PATCH)))                                     	\
+    )
+
+/*!
+ * @brief  True if the current version is older than the given one.
+ */
+#define VERSION_LT( MAJOR , MINOR , PATCH )                        		\
+    (                                                                           \
+        (VERSION_MAJOR < MAJOR) ||                                  		\
+        (VERSION_MAJOR == MAJOR &&                                  		\
+         (VERSION_MINOR < MINOR  ||                                 		\
+          (VERSION_MINOR == MINOR &&                                		\
+           VERSION_PATCH < PATCH)))                                 		\
+    )
+
+/*!
+ * @brief  True if the current version is older or equal to the given.
+ */
+#define VERSION_LE( MAJOR , MINOR , PATCH )                        		\
+    (                                                                           \
+        (VERSION_MAJOR < MAJOR) ||                                    		\
+        (VERSION_MAJOR == MAJOR &&                                    		\
+         (VERSION_MINOR < MINOR  ||                                    		\
+          (VERSION_MINOR == MINOR &&                                    	\
+           VERSION_PATCH <= PATCH)))                                     	\
+    )
+
+
+class Version 
+{
+public:
+
+    Version();
+    Version(const Version &orig);
+    Version( const std::string &version );
+    virtual ~Version();
+
+    /*!
+     *  @return the current major version of @Name@.
+     */
+    static int getMajor ();
+
+    /*!
+     * @return the current minor version of @Name@.
+     */
+    static int getMinor ();
+
+    /*!
+     * @return the current patch level of @Name@.
+     */
+    static int getPatch ();
+
+    /*!
+     * @return the current @Name@ version (MM.mm.pp).
+     */
+    static std::string getString ();
+
+    /*!
+     * @return the SCM revision.
+     */
+    static std::string getRevision ();
+
+    static std::string compilerString ();
+    /*!
+     *  @return the current binary interface version of @Name@.
+     */
+    static std::string  getABI ();
+
+    /*!
+     * @return the current @Name@ version plus the git SHA hash (MM.mm.pp.rev).
+     */
+    static std::string getRevString ();
+    /*!
+     * @brief Runtime check for ABI compatibility.
+     *          Call from code using @Name@. Will fail if the executable
+     *          was compiled against a version incompatible with the runtime version.
+     * @return true if the link-time and compile-time DSO are compatible.
+     */
+    static bool check ();
+    /*!
+     * @return JSON schema describing this object.
+     */
+    static std::string getSchema ();
+
+    /*!
+     *  @return JSON-encoded data for this object.
+     */
+    static std::string toJSON ();
+    /*!
+     * @brief Compare  plugin version against version of his layer.
+     * @return true if .
+     */
+    bool checkVersion(const std::string ref_version, const std::string elem_version)
+    {
+/*
+        QStringList ve_ref_list = ref_version.split(".");
+        QStringList ve_elem_list = elem_version.split(".");
+
+        //if major level different return false
+        if (ve_ref_list.at(0).toInt() != ve_elem_list.at(0).toInt())
+        {
+            return false;
+        }
+
+        //if minor level of ref < elem return false
+        if (ve_ref_list.at(1).toInt() < ve_elem_list.at(1).toInt())
+        {
+            return false;
+        }
+        else
+        {
+            // no patch level specified in ref
+            if (ve_ref_list.size() < 3 || ve_elem_list.size() < 3) {
+            {
+                return true;
+            }
+        }
+
+            //if same minor level, compare patch level
+        if ((ve_ref_list.at(1).toInt() == ve_elem_list.at(1).toInt()) &&
+                    (ve_ref_list.at(2).toInt() < ve_elem_list.at(2).toInt()))
+        {
+            return false;
+        }
+
+            //else minor level of elem < ref , then don't compare patch level
+        }
+*/
+        return true;
+    }
+
+protected:
+
+    bool operator < (const Version &rhs) const
+    {
+        return compareVersion(rhs) < 0;
+    }
+
+    bool operator > (const Version &rhs) const
+    {
+        return compareVersion(rhs) > 0;
+    }
+
+    bool operator <= (const Version &rhs) const
+    {
+        return compareVersion(rhs) <= 0;
+    }
+
+    bool operator >= (const Version &rhs) const
+    {
+        return compareVersion(rhs) >= 0;
+    }
+
+    bool operator == (const Version &rhs) const
+    {
+        return compareVersion(rhs) == 0;
+    }
+
+    bool operator != (const Version &rhs) const
+    {
+        return compareVersion(rhs) != 0;
+    }
+
+private:
+
+    unsigned int major;
+    unsigned int minor;
+    unsigned int patch;
+    unsigned int tweak;
+    std::string m_extra;
+    std::string m_version;
+
+    int compareVersion (const Version &rhs) const;
+};
+
+#endif
