@@ -544,7 +544,8 @@ OpenDDS:
 #        - export JAVA_HOME=/opt/jdk-11.0.1/
 #        - export PATH=/opt/apache-maven-3.6.0/bin:/opt/jdk-11.0.1/bin:$PATH
         - export JAVA_HOME=/opt/jdk1.8.0_192/
-        - export PATH=/opt/apache-maven-3.6.0/bin:/opt/jdk1.8.0_192/bin:$PATH
+        - export M2_HOME=/opt/apache-maven
+        - export PATH=/opt/apache-maven/bin:/opt/jdk1.8.0_192/bin:$PATH
 
     script:
         - echo "Cloning MPC for DDS"
@@ -607,11 +608,15 @@ vortex-opensplice-dds:
 
     before_script:
         - date -u
-#        sudo apt-get install python-wheel cython cython3 python3-wheel  #build Python DCPS API
-        # - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
-        # - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
+#        - sudo apt-get install python-wheel cython cython3 python3-wheel python3-setuptools python-setuptools #build Python DCPS API
+#        - export CMAKE_PREFIX_PATH=/opt/Qt5.11.2/5.11.2/gcc_64:$CMAKE_PREFIX_PATH
+#        - export QTDIR=/opt/Qt5.11.2/5.11.2/gcc_64
 #        - export PROTOBUF_HOME=`pwd`
 #        - export  PROTOBUF_HOME=${DEPS_INSTALL_DIR}/include/google/
+        - export JAVA_HOME=/opt/jdk1.8.0_192/
+        - export M2_HOME=/opt/apache-maven
+        - export JACORB_HOME=/opt/jacorb-3.9
+        - export PATH=/opt/apache-maven/bin:/opt/jdk1.8.0_192/bin:${DEPS_INSTALL_DIR}:$PATH
 
     script:
         - git clone --depth=1 --recurse-submodules  https://github.com/ADLINK-IST/opensplice.git
