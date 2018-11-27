@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" name="test" packages="">
+    <Appenders>
+        <Syslog name="test" format="RFC5424" host="10.1.1.100" port="514"
+            protocol="UDP" appName="storm" includeMDC="true" mdcId="mdc"
+            facility="LOCAL7" enterpriseNumber="18060" newLine="true" 
+            messageId="Audit" id="App">
+            <LoggerFields>
+                <KeyValuePair key="category" value="%c"/>             
+                <KeyValuePair key="programname" value="%C"/>
+            </LoggerFields>
+            </Syslog>           
+    </Appenders>
+    <Loggers>
+        <Logger name="test" level="INFO">
+        <AppenderRef ref="test"/>
+     </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="test"/>
+        </Root>
+    </Loggers>
+</Configuration>

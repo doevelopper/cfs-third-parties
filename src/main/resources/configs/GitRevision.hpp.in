@@ -1,0 +1,24 @@
+#ifndef GIT_REVISION_DATA_HPP
+#define GIT_REVISION_DATA_HPP
+    #define HASH                       "@HASH@"
+    #define DATE                       "@COPYRIGHT_YEAR@"
+    #define BRANCH                     "@GIT_BRANCH@"
+    #define GIT_COMMIT_VERSION         0x@GIT_REVISION@
+    #define GIT_COMMIT_DESC            "@GIT_COMMIT_SUBJECT@"
+    #define NB_GIT_COMMIT              "@NB_COMMIT@"
+    #define ALL_GIT_COMMIT_COUNT       "@ALL_GIT_COMMIT_COUNT@"
+    #define CMAKE_COMMAND              R"(@CMAKE_COMMAND@) (@CMAKE_MAJOR_VERSION@.@CMAKE_MINOR_VERSION@.@CMAKE_PATCH_VERSION@)"
+    #define BUILD_TYPE                 "@CMAKE_BUILD_TYPE@"
+    #define BUILD_PROCESSOR            "@CMAKE_SYSTEM_PROCESSOR@"
+    #define SOURCE_DIRECTORY           R"(@CMAKE_SOURCE_DIR@)"
+    #define BUILD_DIRECTORY            R"(@BUILDDIR@)"
+    #define VER_COMPANYNAME_STR        "A.H.L SW Engineering"
+    #define VER_LEGALCOPYRIGHT_STR     "(c) 2015-@COPYRIGHT_YEAR@ A.H.L SW Engineering Labs"
+    #define VER_FILEVERSION            @PROJECT_NAME_MAJOR_VERSION@,@PROJECT_NAME_MINOR_VERSION@,@PROJECT_NAME_MICRO_VERSION@
+    #define HOST_OS_NAME               "@CMAKE_SYSTEM_NAME@"
+    #define HOST_OS_LONGNAME           "@CMAKE_SYSTEM@"
+    #define HOST_OS_VERSION            "@CMAKE_SYSTEM_VERSION@"
+    #define VER_FILEVERSION_STR         "@GIT_REVISION@ @GIT_DATE@ (@GIT_BRANCH@ branch)"
+    #define VER_PRODUCTVERSION          VER_FILEVERSION
+    #define VER_PRODUCTVERSION_STR      VER_FILEVERSION_STR
+#endif

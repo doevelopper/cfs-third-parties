@@ -74,7 +74,7 @@ before_script:
     - export LC_ALL=en_US.UTF-8
     - export LANG=en_US.UTF-8
 #    #!/bin/bash -e
-#    RELEASE=0.5.1
+#    RELEASE=0.19.2
 #    wget https://github.com/bazelbuild/bazel/releases/download/${RELEASE}/bazel-${RELEASE}-installer-linux-x86_64.sh
 #    wget https://github.com/bazelbuild/bazel/releases/download/${RELEASE}/bazel-${RELEASE}-installer-linux-x86_64.sh.sha256
 #    sha256sum -c bazel-${RELEASE}-installer-linux-x86_64.sh.sha256
@@ -279,6 +279,15 @@ testing-tools-libraries:
         - cmake --build build --target install || true
         - cd ..
 
+        - echo "Building GUnit - Google.Test/Google.Mock/Cucumber on steroids."
+        - git clone --depth=1 https://github.com/cpp-testing/GUnit.git
+        - cd GUnit
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake ..-DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install || true
+        - cd ..
+
     after_script:
         - date -u
 
@@ -294,7 +303,7 @@ testing-tools-libraries:
         - date -u
     script:
         - echo "Building translating between absolute and civil times"
-        - git clone https://github.com/google/cctz.git
+        - git clone --depth=1 https://github.com/google/cctz.git
         - cd cctz
         - cmake -E make_directory mybuild
         - cmake -E chdir mybuild cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} ..
@@ -303,6 +312,28 @@ testing-tools-libraries:
         - cmake --build mybuild --config Release --target install
         - cmake --build mybuild --target install
         - cd ..
+
+    after_script:
+        - date -u
+
+breakpad:
+    <<: *agent-47
+    <<: *variables
+    stage: dependencies
+
+    before_script:
+        - date -u
+    script:
+        - echo "Building Apache Runtime Library"
+        - git clone --depth=1 https://github.com/google/breakpad.git
+        - cd breakpad
+        - git clone https://chromium.googlesource.com/linux-syscall-support src/third_party/lss
+        - ./configure --prefix=${DEPS_INSTALL_DIR}
+        - make -j 4
+        - make install
+
+    after_script:
+        - date -u
 
 logging utils:
     <<: *agent-47
@@ -567,7 +598,7 @@ OpenDDS:
     after_script:
         - date -u
 
-.vortex-opensplice-dds:
+vortex-opensplice-dds:
     <<: *agent-47
     <<: *variables
     stage: data-distribution-service
@@ -591,25 +622,18 @@ OpenDDS:
         - make -pv ${DEPS_INSTALL_DIR}/vortexDDS
         - cp -Rv install/HDE ${DEPS_INSTALL_DIR}/vortexDDS/
         - cp -Rv install/RTS ${DEPS_INSTALL_DIR}/vortexDDS/
-        - cp -Rv install/VS ${DEPS_INSTALL_DIR}/vortexDDS/
         - cd ..
 
     after_script:
         - date -u
         # - mkdir -pv ${DEPS_INSTALL_DIR}/adlinktech
-        # - cp -v envs-x86_64.linux-release.sh ${DEPS_INSTALL_DIR}/adlinktech
-        # - cp -Rv opensplice/install/HDE ${DEPS_INSTALL_DIR}/adlinktech
-        # - cp -Rv opensplice/install/RTS ${DEPS_INSTALL_DIR}/adlinktech
-        # - cp -Rv opensplice/install/VS ${DEPS_INSTALL_DIR}/adlinktech
 
     artifacts:
         name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
         paths:
-#            - ${DEPS_INSTALL_DIR}
-            - opensplice/envs-x86_64.linux-release.sh
             - opensplice/install/HDE
             - opensplice/install/RTS
-            - opensplice/install/VS
+            - opensplice/install/VC/*-installer.tar
 
 eprosima-dds-feature-test:
     <<: *agent-47

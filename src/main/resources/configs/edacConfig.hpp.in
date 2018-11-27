@@ -1,0 +1,25 @@
+
+#ifndef CFS_EDAC_EDACCONFIG_HPP
+#define CFS_EDAC_EDACCONFIG_HPP
+
+/*!
+ * @brief CFS/EDAC public API wrap for C++ compilers.
+ *   */
+#ifdef __cplusplus
+
+    #define CFS_BEGIN_DECLS     extern "C" {
+    #define CFS_END_DECLS       }
+
+#else
+
+    #define CFS_BEGIN_DECLS
+    #define CFS_END_DECLS
+
+#endif
+
+/*!
+ * @brief 
+ */ 
+#define CFS_DECLARE(type)  type
+
+#endif
