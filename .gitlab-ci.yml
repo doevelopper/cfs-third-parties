@@ -279,6 +279,15 @@ testing-tools-libraries:
         - cmake --build build --target install || true
         - cd ..
 
+        - echo "Building GUnit - Google.Test/Google.Mock/Cucumber on steroids."
+        - git clone --depth=1 https://github.com/cpp-testing/GUnit.git
+        - cd GUnit
+        - cmake -E make_directory build
+        - cmake -E chdir build cmake ..-DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+        - cmake --build build --target all --clean-first
+        - cmake --build build --target install || true
+        - cd ..
+
     after_script:
         - date -u
 
@@ -294,7 +303,7 @@ testing-tools-libraries:
         - date -u
     script:
         - echo "Building translating between absolute and civil times"
-        - git clone https://github.com/google/cctz.git
+        - git clone --depth=1 https://github.com/google/cctz.git
         - cd cctz
         - cmake -E make_directory mybuild
         - cmake -E chdir mybuild cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} ..
@@ -303,6 +312,28 @@ testing-tools-libraries:
         - cmake --build mybuild --config Release --target install
         - cmake --build mybuild --target install
         - cd ..
+
+    after_script:
+        - date -u
+
+breakpad:
+    <<: *agent-47
+    <<: *variables
+    stage: dependencies
+
+    before_script:
+        - date -u
+    script:
+        - echo "Building Apache Runtime Library"
+        - git clone --depth=1 https://github.com/google/breakpad.git
+        - cd breakpad
+        - git clone https://chromium.googlesource.com/linux-syscall-support src/third_party/lss
+        - ./configure --prefix=${DEPS_INSTALL_DIR}
+        - make -j 4
+        - make install
+
+    after_script:
+        - date -u
 
 logging utils:
     <<: *agent-47
