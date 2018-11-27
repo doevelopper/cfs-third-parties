@@ -15,6 +15,8 @@ d88' `"Y8  888    d88(  "8         <88b.  `888""8P d88' `888     888' `88b `P  )
 ```
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://gitlab.com/doevelopper/cppbdd101/tree/develop)
+[![License](https://img.shields.io/badge/license-Apache%20license%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](http://www.gnu.org/licenses/lgpl-3.0)  
 
 Branch   | Gitlab-CI | Travis | Build |  Tests  | Integration Test | Coverage | Documentation |
 |--------|-----------|--------|-------|---------|------------------|----------|---------------|
